@@ -121,37 +121,37 @@ class EmployeeDetailResponse(BaseModel):
 
 # Create Employee Schemas
 class PrivateInfoCreate(BaseModel):
-    dob: Optional[date] = None
-    address: Optional[str] = None
-    nationality: Optional[str] = None
-    gender: Optional[str] = None
-    martial_status: Optional[bool] = None
+    dob: date
+    address: str
+    nationality: str
+    gender: str
+    martial_status: bool
     doj: date
-    bank_acc_no: Optional[str] = None
-    bank_name: Optional[str] = None
-    ifsc_code: Optional[str] = None
-    pan_no: Optional[str] = None
-    uan_no: Optional[str] = None
+    bank_acc_no: str
+    bank_name: str
+    ifsc_code: str
+    pan_no: str
+    uan_no: str
 
 
 class SalaryCreate(BaseModel):
     monthly_wage: int
-    yearly_wage: Optional[int] = None
+    yearly_wage: int
     basic_sal: int
-    hra: Optional[int] = None
-    sa: Optional[int] = None
-    perf_bonus: Optional[int] = None
-    ita: Optional[int] = None
-    fa: Optional[int] = None
-    pf1: Optional[int] = None
-    pf2: Optional[int] = None
-    prof_tax: Optional[int] = None
+    hra: int
+    sa: int
+    perf_bonus: int
+    ita: int
+    fa: int
+    pf1: int
+    pf2: int
+    prof_tax: int
 
 
 class ResumeCreate(BaseModel):
-    about: Optional[int] = None
-    skills: Optional[str] = None
-    certification: Optional[str] = None
+    about: int
+    skills: str
+    certification: str
 
 
 class EmployeeCreate(BaseModel):
@@ -159,14 +159,14 @@ class EmployeeCreate(BaseModel):
     first_name: str  # For ID generation
     last_name: str   # For ID generation
     year_of_joining: int  # For ID generation
-    phone: Optional[str] = None
+    phone: str
     department: str
     email: EmailStr
-    manager: Optional[str] = None
-    location: Optional[str] = None
+    manager: str
+    location: str
     job_position: str
     prof_pic: Optional[bytes] = None
-    current_status: Optional[int] = 1
+    current_status: int = 1
     
     # Related data
     private_info: PrivateInfoCreate
