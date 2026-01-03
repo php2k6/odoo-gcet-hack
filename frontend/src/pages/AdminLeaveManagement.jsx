@@ -95,12 +95,12 @@ export default function AdminLeaveManagement() {
         });
       }
       
+      // Remove the leave card from local state immediately
+      setLeaves(prevLeaves => prevLeaves.filter(leave => leave.id !== leaveId));
+      
       // Clear comment and close panel
       setAdminComments({ ...adminComments, [leaveId]: '' });
       setSelectedLeave(null);
-      
-      // Refresh leave list to get updated data
-      fetchLeaves();
     } catch (err) {
       console.error('Error updating leave:', err);
       setToast({

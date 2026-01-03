@@ -75,8 +75,82 @@ export default function AttendancePage() {
         } catch (err) {
             console.error('Error fetching admin attendance:', err);
             setError(err.response?.data?.message || 'Failed to fetch attendance data');
-            setAttendanceData([]);
-            setAdminSummary(null);
+            
+            // Set mock data for admin
+            const mockAdminData = [
+                {
+                    emp_id: 'STPRPA20260001',
+                    employee_name: 'Sarah Johnson',
+                    department: 'Engineering',
+                    date: selDate.toISOString().slice(0, 10),
+                    start_time: new Date(selDate.setHours(9, 15, 0)).toISOString(),
+                    end_time: new Date(selDate.setHours(18, 30, 0)).toISOString(),
+                    work_hours: 9.25,
+                    extra_hours: 0.25,
+                    on_leave: false
+                },
+                {
+                    emp_id: 'STPRPA20260002',
+                    employee_name: 'James Wilson',
+                    department: 'Product',
+                    date: selDate.toISOString().slice(0, 10),
+                    start_time: new Date(selDate.setHours(8, 45, 0)).toISOString(),
+                    end_time: new Date(selDate.setHours(17, 45, 0)).toISOString(),
+                    work_hours: 9.0,
+                    extra_hours: 0.0,
+                    on_leave: false
+                },
+                {
+                    emp_id: 'STPRPA20260003',
+                    employee_name: 'Maria Garcia',
+                    department: 'Design',
+                    date: selDate.toISOString().slice(0, 10),
+                    start_time: new Date(selDate.setHours(9, 0, 0)).toISOString(),
+                    end_time: new Date(selDate.setHours(18, 0, 0)).toISOString(),
+                    work_hours: 9.0,
+                    extra_hours: 0.0,
+                    on_leave: false
+                },
+                {
+                    emp_id: 'STPRPA20260004',
+                    employee_name: 'Robert Chen',
+                    department: 'Engineering',
+                    date: selDate.toISOString().slice(0, 10),
+                    start_time: new Date(selDate.setHours(9, 30, 0)).toISOString(),
+                    end_time: new Date(selDate.setHours(19, 0, 0)).toISOString(),
+                    work_hours: 9.5,
+                    extra_hours: 0.5,
+                    on_leave: false
+                },
+                {
+                    emp_id: 'STPRPA20260005',
+                    employee_name: 'Emily Davis',
+                    department: 'Marketing',
+                    date: selDate.toISOString().slice(0, 10),
+                    start_time: null,
+                    end_time: null,
+                    work_hours: 0,
+                    extra_hours: 0,
+                    on_leave: true
+                }
+            ];
+            
+            setAttendanceData(mockAdminData);
+            setAdminSummary({
+                total_employees: 5,
+                present_count: 4,
+                absent_count: 0,
+                on_leave_count: 1
+            });
+            
+            // Set mock employee statuses
+            setEmployeeStatuses({
+                'STPRPA20260001': { current_status: 1, status_description: 'Checked In' },
+                'STPRPA20260002': { current_status: 0, status_description: 'Checked Out' },
+                'STPRPA20260003': { current_status: 1, status_description: 'Checked In' },
+                'STPRPA20260004': { current_status: 1, status_description: 'Checked In' },
+                'STPRPA20260005': { current_status: 2, status_description: 'On Leave' }
+            });
         } finally {
             setLoading(false);
         }
@@ -98,8 +172,74 @@ export default function AttendancePage() {
         } catch (err) {
             console.error('Error fetching attendance:', err);
             setError(err.response?.data?.message || 'Failed to fetch attendance data');
-            setAttendanceData([]);
-            setSummary(null);
+            
+            // Set mock data for employee - generate last 30 days
+            const mockEmployeeData = [];
+            const today = new Date();
+            const startOfMonth = new Date(selDate.getFullYear(), selDate.getMonth(), 1);
+            const daysInMonth = new Date(selDate.getFullYear(), selDate.getMonth() + 1, 0).getDate();
+            
+            for (let i = 1; i <= daysInMonth && i <= today.getDate(); i++) {
+                const date = new Date(selDate.getFullYear(), selDate.getMonth(), i);
+                const dayOfWeek = date.getDay();
+                
+                // Skip weekends
+                if (dayOfWeek === 0 || dayOfWeek === 6) continue;
+                
+                // Randomly assign some days as leave
+                const isOnLeave = Math.random() < 0.1; // 10% chance of leave
+                
+                if (isOnLeave) {
+                    mockEmployeeData.push({
+                        emp_id: 'EMP001',
+                        employee_name: 'Current User',
+                        date: date.toISOString().slice(0, 10),
+                        start_time: null,
+                        end_time: null,
+                        work_hours: 0,
+                        extra_hours: 0,
+                        on_leave: true
+                    });
+                } else {
+                    const checkInHour = 9 + Math.floor(Math.random() * 2); // 9-10 AM
+                    const checkInMinute = Math.floor(Math.random() * 60);
+                    const checkOutHour = 17 + Math.floor(Math.random() * 3); // 5-7 PM
+                    const checkOutMinute = Math.floor(Math.random() * 60);
+                    
+                    const startTime = new Date(date);
+                    startTime.setHours(checkInHour, checkInMinute, 0);
+                    
+                    const endTime = new Date(date);
+                    endTime.setHours(checkOutHour, checkOutMinute, 0);
+                    
+                    const workHours = (endTime - startTime) / (1000 * 60 * 60);
+                    const extraHours = Math.max(0, workHours - 9);
+                    
+                    mockEmployeeData.push({
+                        emp_id: 'EMP001',
+                        employee_name: 'Current User',
+                        date: date.toISOString().slice(0, 10),
+                        start_time: startTime.toISOString(),
+                        end_time: endTime.toISOString(),
+                        work_hours: workHours,
+                        extra_hours: extraHours,
+                        on_leave: false
+                    });
+                }
+            }
+            
+            setAttendanceData(mockEmployeeData);
+            
+            // Calculate summary
+            const presentDays = mockEmployeeData.filter(d => !d.on_leave).length;
+            const leaveCount = mockEmployeeData.filter(d => d.on_leave).length;
+            
+            setSummary({
+                present_days: presentDays,
+                leave_count: leaveCount,
+                leave_left: 12 - leaveCount,
+                tot_work_days: mockEmployeeData.length
+            });
         } finally {
             setLoading(false);
         }

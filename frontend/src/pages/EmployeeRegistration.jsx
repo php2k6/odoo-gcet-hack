@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { User, Briefcase, CreditCard, FileText, Upload, ChevronRight } from 'lucide-react';
+import EmployeeNav from '../components/EmployeeNav';
 
 export default function EmployeeOnboardingForm() {
   const [currentSection, setCurrentSection] = useState(1);
@@ -7,6 +8,7 @@ export default function EmployeeOnboardingForm() {
   const [profileImage, setProfileImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -161,8 +163,10 @@ export default function EmployeeOnboardingForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
+    <>
+      <EmployeeNav showProfileMenu={showProfileMenu} setShowProfileMenu={setShowProfileMenu} />
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">Employee Onboarding</h1>
           <p className="text-gray-600">Complete your profile to get started</p>
@@ -727,5 +731,6 @@ export default function EmployeeOnboardingForm() {
         </p>
       </div>
     </div>
+    </>
   );
 }
