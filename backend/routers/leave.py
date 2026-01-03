@@ -74,7 +74,7 @@ async def get_all_leaves_admin(
     # Apply status filter if provided
     if status_filter:
         if status_filter.lower() == "pending":
-            query = query.filter(LeaveTable.is_approved == False)
+            query = query.filter((LeaveTable.is_approved == False) | (LeaveTable.is_approved == None))
         elif status_filter.lower() == "approved":
             query = query.filter(LeaveTable.is_approved == True)
     
@@ -103,7 +103,7 @@ async def get_employee_leaves(
     # Apply status filter if provided
     if status_filter:
         if status_filter.lower() == "pending":
-            query = query.filter(LeaveTable.is_approved == False)
+            query = query.filter((LeaveTable.is_approved == False) | (LeaveTable.is_approved == None))
         elif status_filter.lower() == "approved":
             query = query.filter(LeaveTable.is_approved == True)
     
@@ -145,14 +145,14 @@ async def approve_leave(
     return leave
 
 
-@router.put("/{leave_id}/reject", response_model=LeaveResponse)
+@router.delete("/{leave_id}/reject", status_code=status.HTTP_200_OK)
 async def reject_leave(
     leave_id: int,
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
     """
-    Reject a leave request
+    Reject a leave request - Deletes the leave record
     Admin only
     """
     # Check if user is admin
@@ -170,9 +170,8 @@ async def reject_leave(
             detail="Leave request not found"
         )
     
-    # Update is_approved to False
-    leave.is_approved = False
+    # Delete the leave request
+    db.delete(leave)
     db.commit()
-    db.refresh(leave)
     
-    return leave
+    return {"message": "Leave request rejected and deleted successfully"}
