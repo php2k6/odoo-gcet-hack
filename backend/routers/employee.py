@@ -97,68 +97,74 @@ async def create_employee(
     )
     password = generate_password(employee_id)
     
-    # Create employee
-    new_employee = Employee(
-        id=employee_id,
-        company_id=current_company.id,
-        name=employee_data.name,
-        password=get_password_hash(password),
-        phone=employee_data.phone,
-        department=employee_data.department,
-        email=employee_data.email,
-        manager=employee_data.manager,
-        location=employee_data.location,
-        job_position=employee_data.job_position,
-        prof_pic=employee_data.prof_pic,
-        current_status=employee_data.current_status
-    )
-    
-    db.add(new_employee)
-    db.flush()  # Flush to make employee available for foreign keys
-    
-    # Create private info
-    private_info = PrivateInfo(
-        emp_id=employee_id,
-        **employee_data.private_info.model_dump()
-    )
-    db.add(private_info)
-    
-    # Create salary
-    salary = Salary(
-        emp_id=employee_id,
-        **employee_data.salary.model_dump()
-    )
-    db.add(salary)
-    
-    # Create resume if provided
-    if employee_data.resume:
-        resume = Resume(
-            emp_id=employee_id,
-            **employee_data.resume.model_dump()
+    try:
+        # Create employee
+        new_employee = Employee(
+            id=employee_id,
+            company_id=current_company.id,
+            name=employee_data.name,
+            password=get_password_hash(password),
+            phone=employee_data.phone,
+            department=employee_data.department,
+            email=employee_data.email,
+            manager=employee_data.manager,
+            location=employee_data.location,
+            job_position=employee_data.job_position,
+            prof_pic=employee_data.prof_pic,
+            current_status=employee_data.current_status
         )
-        db.add(resume)
-    
-    # Create summary with default values
-    summary = Summary(
-        emp_id=employee_id,
-        present_days=0,
-        leave_count=0,
-        leave_left=20,  # Default 20 leaves
-        tot_work_days=0
-    )
-    db.add(summary)
-    
-    # Commit all changes
-    db.commit()
-    db.refresh(new_employee)
-    
-    return {
-        "id": employee_id,
-        "password": password,
-        "name": employee_data.name,
-        "email": employee_data.email,
-        "message": "Employee created successfully"
-    }
+        
+        db.add(new_employee)
+        db.flush()  # Flush to make employee available for foreign keys
+        
+        # Create private info
+        private_info = PrivateInfo(
+            emp_id=employee_id,
+            **employee_data.private_info.model_dump()
+        )
+        db.add(private_info)
+        
+        # Create salary
+        salary = Salary(
+            emp_id=employee_id,
+            **employee_data.salary.model_dump()
+        )
+        db.add(salary)
+        
+        # Create resume if provided
+        if employee_data.resume:
+            resume = Resume(
+                emp_id=employee_id,
+                **employee_data.resume.model_dump()
+            )
+            db.add(resume)
+        
+        # Create summary with default values
+        summary = Summary(
+            emp_id=employee_id,
+            present_days=0,
+            leave_count=0,
+            leave_left=20,  # Default 20 leaves
+            tot_work_days=0
+        )
+        db.add(summary)
+        
+        # Commit all changes
+        db.commit()
+        db.refresh(new_employee)
+        
+        return {
+            "id": employee_id,
+            "name": employee_data.name,
+            "email": employee_data.email,
+            "message": "Employee created successfully"
+        }
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create employee: {str(e)}"
+        )
 
 
 @router.get("/{emp_id}", response_model=EmployeeDetailResponse)
@@ -249,8 +255,15 @@ async def update_employee(
     for key, value in update_data.items():
         setattr(employee, key, value)
     
-    db.commit()
-    db.refresh(employee)
+    try:
+        db.commit()
+        db.refresh(employee)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update employee: {str(e)}"
+        )
     
     return employee
 
@@ -314,8 +327,15 @@ async def update_employee_resume(
         )
         db.add(resume)
     
-    db.commit()
-    db.refresh(resume)
+    try:
+        db.commit()
+        db.refresh(resume)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update resume: {str(e)}"
+        )
     
     return resume
 
@@ -365,8 +385,15 @@ async def update_employee_salary(
         )
         db.add(salary)
     
-    db.commit()
-    db.refresh(salary)
+    try:
+        db.commit()
+        db.refresh(salary)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update salary: {str(e)}"
+        )
     
     return salary
 
@@ -398,8 +425,15 @@ async def delete_employee(
         )
     
     # Delete employee (cascade will delete all related records)
-    db.delete(employee)
-    db.commit()
+    try:
+        db.delete(employee)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete employee: {str(e)}"
+        )
     
     return None
 
@@ -448,6 +482,13 @@ async def update_employee_password(
     # Hash and update password
     employee.password = get_password_hash(password_data.new_password)
     
-    db.commit()
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update password: {str(e)}"
+        )
     
     return {"message": "Password updated successfully"}
