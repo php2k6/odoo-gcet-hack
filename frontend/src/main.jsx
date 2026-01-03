@@ -3,16 +3,17 @@ import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import './index.css'
 import App from './App.jsx'
+import { AuthProvider } from './context/AuthContext.jsx'
 import Home from './pages/Home.jsx'
 import About from './pages/About.jsx'
 import Contact from './pages/Contact.jsx'
 import Login from './pages/Login.jsx'
 import Signup from './pages/Signup.jsx'
 import Dashboard from './pages/Dashboard.jsx'
-import EmployeeDashboard from './pages/EmployeeDashboard.jsx'
-import EmployeeProfile from './pages/EmployeeProfile.jsx'
+import Profile from './pages/Profile.jsx'
 import EmployeeAttendance from './pages/EmployeeAttendance.jsx'
 import EmployeeLeave from './pages/EmployeeLeave.jsx'
+import AttendancePage from './pages/AttendancePage.jsx'
 import NotFound from './pages/NotFound.jsx'
 
 const router = createBrowserRouter([
@@ -23,6 +24,10 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
+        element: <Login />,
+      },
+      {
+        path: 'home',
         element: <Home />,
       },
       {
@@ -46,15 +51,19 @@ const router = createBrowserRouter([
         element: <Dashboard />,
       },
       {
+        path: 'profile',
+        element: <Profile />,
+      },
+      {
+        path: 'attendance',
+        element: <AttendancePage />,
+      },
+      {
         path: 'employee',
         children: [
           {
-            path: '',
-            element: <EmployeeDashboard />,
-          },
-          {
             path: 'profile',
-            element: <EmployeeProfile />,
+            element: <Profile />,
           },
           {
             path: 'attendance',
@@ -72,6 +81,8 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
   </StrictMode>,
 )

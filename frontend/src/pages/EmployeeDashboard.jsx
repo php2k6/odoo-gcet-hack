@@ -23,38 +23,7 @@ function EmployeeDashboard() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
             {/* Header */}
-            <header className="bg-white shadow-sm border-b border-gray-200">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                    <div className="flex items-center justify-between">
-                        <h1 className="text-2xl font-bold text-gray-900">Employee Dashboard</h1>
-                        <div className="relative">
-                            <button
-                                onClick={() => setShowNotifications(!showNotifications)}
-                                className="p-2 rounded-full hover:bg-gray-100 transition-colors relative"
-                            >
-                                <Bell className="w-6 h-6 text-gray-600" />
-                                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                            </button>
-
-                            {showNotifications && (
-                                <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
-                                    <div className="p-4 border-b border-gray-200">
-                                        <h3 className="font-semibold text-gray-900">Recent Activity</h3>
-                                    </div>
-                                    <div className="max-h-64 overflow-y-auto">
-                                        {recentActivity.map((activity, index) => (
-                                            <div key={index} className="p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                                                <p className="text-sm text-gray-900">{activity.text}</p>
-                                                <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </header>
+            
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Quick Access Cards */}

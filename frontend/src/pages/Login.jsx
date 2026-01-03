@@ -2,19 +2,87 @@ import React, { useState } from 'react';
 import { Mail, Eye, EyeOff } from 'lucide-react';
 import { MyToast } from "../components/MyToast";
 import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
     const [showPassword, setShowPassword] = useState(false);
-    const [email, setEmail] = useState('');
+    const [identifier, setIdentifier] = useState(''); // Email or Employee ID
     const [password, setPassword] = useState('');
+    const [role, setRole] = useState('employee');
     const [toast, setToast] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [emailError, setEmailError] = useState('');
     const navigate = useNavigate();
+    const { login } = useAuth();
 
-    const handleSubmit = (e) => {
+    // Email validation function
+    const validateEmail = (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
+    // Handle identifier input change
+    const handleIdentifierChange = (e) => {
+        const value = e.target.value;
+        setIdentifier(value);
+        
+        // Only validate as email if it contains @
+        if (value.includes('@')) {
+            if (!validateEmail(value)) {
+                setEmailError('Please enter a valid email address');
+            } else {
+                setEmailError('');
+            }
+        } else {
+            setEmailError('');
+        }
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Login functionality would go here
-        // For now, just redirect to dashboard
-        navigate('/dashboard');
+        
+        // Validate if identifier contains @ (email) before submitting
+        if (identifier.includes('@') && !validateEmail(identifier)) {
+            setToast({
+                message: 'Please enter a valid email address',
+                type: 'error'
+            });
+            return;
+        }
+        
+        if (!identifier.trim()) {
+            setToast({
+                message: 'Please enter your email or employee ID',
+                type: 'error'
+            });
+            return;
+        }
+        
+        setIsLoading(true);
+        
+        try {
+            // Call the login function from context
+            await login({ email: identifier, password, role });
+            
+            // Show success message
+            setToast({
+                message: 'Login successful!',
+                type: 'success'
+            });
+            
+            // Redirect to dashboard after a short delay
+            setTimeout(() => {
+                navigate('/dashboard');
+            }, 1000);
+        } catch (error) {
+            // Show error message
+            setToast({
+                message: error.response?.data?.message || 'Login failed. Please try again.',
+                type: 'error'
+            });
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -28,34 +96,55 @@ export default function Login() {
                             <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
                                 <div className="w-5 h-5 border-2 border-white rounded"></div>
                             </div>
-                            <span className="text-xl font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">DayFlow</span>
+                            <span className="text-xl font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">DayFlow HRM </span>
                         </div>
                     </div>
 
                     {/* Header */}
                     <div className="mb-8">
                         <p className="text-sm text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text font-medium mb-2">Welcome back</p>
-                        <h1 className="text-3xl font-bold text-gray-900">Sign In to DayFlow</h1>
+                        <h1 className="text-3xl font-bold text-gray-900">Sign In to HR Portal</h1>
                     </div>
 
                     {/* Form */}
                     <div className="space-y-6">
-                        {/* Email Input */}
+                        {/* Email or Employee ID Input */}
                         <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                                E-mail
+                            <label htmlFor="identifier" className="block text-sm font-medium text-gray-700 mb-2">
+                                Email / Employee ID
                             </label>
                             <div className="relative">
                                 <input
-                                    type="email"
-                                    id="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="example@email.com"
-                                    className="w-full px-4 py-3 pr-10 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition bg-white hover:border-purple-300"
+                                    type="text"
+                                    id="identifier"
+                                    value={identifier}
+                                    onChange={handleIdentifierChange}
+                                    placeholder="email@example.com or EMP001"
+                                    className={`w-full px-4 py-3 pr-10 border-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition bg-white hover:border-purple-300 ${
+                                        emailError ? 'border-red-300' : 'border-gray-200'
+                                    }`}
                                 />
                                 <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-400" />
                             </div>
+                            {emailError && (
+                                <p className="mt-1 text-sm text-red-600">{emailError}</p>
+                            )}
+                        </div>
+
+                        {/* Role Selection */}
+                        <div>
+                            <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
+                                Sign in as
+                            </label>
+                            <select
+                                id="role"
+                                value={role}
+                                onChange={(e) => setRole(e.target.value)}
+                                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition bg-white hover:border-purple-300"
+                            >
+                                <option value="employee">Employee</option>
+                                <option value="admin">Admin</option>
+                            </select>
                         </div>
 
                         {/* Password Input */}
@@ -89,9 +178,10 @@ export default function Login() {
                         {/* Sign In Button */}
                         <button
                             onClick={handleSubmit}
-                            className="w-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 text-white font-medium py-3 rounded-lg transition duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                            disabled={isLoading}
+                            className="w-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 text-white font-medium py-3 rounded-lg transition duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Sign In
+                            {isLoading ? 'Signing In...' : 'Sign In'}
                         </button>
                     </div>
 
@@ -117,10 +207,10 @@ export default function Login() {
                         
                         <div className="text-center text-white max-w-2xl relative z-10">
                             <h2 className="text-4xl md:text-5xl font-bold mb-6 drop-shadow-lg">
-                                Welcome Back
+                                DayFlow HRM Solutions
                             </h2>
                             <blockquote className="text-xl md:text-2xl font-light italic opacity-90 drop-shadow-md">
-                                "Success is not final, failure is not fatal: it is the courage to continue that counts."
+                                "Empowering your workforce, streamlining your operations, and building a better workplace together."
                             </blockquote>
                         </div>
                     </div>

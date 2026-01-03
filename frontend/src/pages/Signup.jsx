@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { User, Mail, Phone, Lock, Eye, EyeOff, Building2, Upload } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 export default function Signup() {
+    const navigate = useNavigate();
+    const { signup } = useAuth();
     const [formData, setFormData] = useState({
         companyName: '',
         name: '',
@@ -131,7 +134,7 @@ export default function Signup() {
         }
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         // Validate all fields
         const newErrors = {};
         Object.keys(formData).forEach(key => {
@@ -154,11 +157,28 @@ export default function Signup() {
 
         setIsLoading(true);
 
-        setTimeout(() => {
-            console.log('Signup attempted with:', formData);
-            alert('Signup successful! (Demo)');
+        try {
+            // Call signup function from context
+            await signup({
+                name: formData.name,
+                email: formData.email,
+                phone: formData.phone,
+                password: formData.password,
+                companyName: formData.companyName,
+                logo: logo
+            });
+            
+            // Redirect to dashboard on success
+            navigate('/dashboard');
+        } catch (error) {
+            console.error('Signup error:', error);
+            setErrors({
+                ...errors,
+                submit: error.response?.data?.message || 'Signup failed. Please try again.'
+            });
+        } finally {
             setIsLoading(false);
-        }, 1500);
+        }
     };
 
     const handleKeyDown = (e) => {
@@ -168,277 +188,256 @@ export default function Signup() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50 flex items-center justify-center p-4">
-            <div className="w-full max-w-4xl">
-                <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-                    {/* Logo Section */}
-                    <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-8 text-center">
-                        <div className="w-24 h-24 bg-white rounded-full mx-auto flex items-center justify-center mb-4 shadow-lg">
-                            <svg className="w-12 h-12 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                            </svg>
+        <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
+            {/* Left Column - Form */}
+            <div className="flex items-center justify-center p-8 bg-gradient-to-br from-slate-50 via-white to-purple-50 overflow-y-auto">
+                <div className="w-full max-w-md">
+                    {/* Logo */}
+                    <div className="mb-8">
+                        <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
+                                <div className="w-5 h-5 border-2 border-white rounded"></div>
+                            </div>
+                            <span className="text-xl font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">DayFlow HRM</span>
                         </div>
-                        <h1 className="text-3xl font-bold text-white mb-2">Create Account</h1>
-                        <p className="text-purple-100">Join us today and get started</p>
                     </div>
 
-                    {/* Form Section */}
-                    <div className="p-8">
-                        <div className="space-y-6">
-                            {/* Company Name with Logo Upload - Full Width */}
-                            <div>
-                                <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Company Name
-                                </label>
-                                <div className="flex gap-3">
-                                    <div className="relative flex-1">
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <Building2 className="h-5 w-5 text-gray-400" />
-                                        </div>
-                                        <input
-                                            id="companyName"
-                                            name="companyName"
-                                            type="text"
-                                            value={formData.companyName}
-                                            onChange={handleChange}
-                                            onBlur={handleBlur}
-                                            onKeyDown={handleKeyDown}
-                                            className={`block w-full pl-10 pr-3 py-3 border ${errors.companyName && touched.companyName ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-purple-500'} rounded-lg focus:ring-2 focus:border-transparent transition duration-200`}
-                                            placeholder="Your Company Name"
-                                        />
-                                    </div>
-                                    <div className="relative">
-                                        <input
-                                            type="file"
-                                            id="logoUpload"
-                                            accept="image/*"
-                                            onChange={handleLogoUpload}
-                                            className="hidden"
-                                        />
-                                        <label
-                                            htmlFor="logoUpload"
-                                            className="flex items-center justify-center w-12 h-12 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-purple-500 transition duration-200 bg-gray-50 hover:bg-purple-50"
-                                        >
-                                            {logo ? (
-                                                <img src={logo} alt="Logo" className="w-full h-full object-cover rounded-lg" />
-                                            ) : (
-                                                <Upload className="h-5 w-5 text-gray-400" />
-                                            )}
-                                        </label>
-                                    </div>
-                                </div>
-                                {errors.companyName && touched.companyName && (
-                                    <p className="mt-1 text-xs text-red-500">{errors.companyName}</p>
-                                )}
-                                {!errors.companyName && (
-                                    <p className="mt-1 text-xs text-gray-500">Click the icon to upload your company logo</p>
-                                )}
-                            </div>
+                    {/* Header */}
+                    <div className="mb-6">
+                        <p className="text-sm text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text font-medium mb-2">Get Started</p>
+                        <h1 className="text-3xl font-bold text-gray-900">Create Your Account</h1>
+                    </div>
 
-                            {/* Two Column Layout for Name and Phone */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {/* Name Input */}
-                                <div>
-                                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                                        Full Name
-                                    </label>
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <User className="h-5 w-5 text-gray-400" />
-                                        </div>
-                                        <input
-                                            id="name"
-                                            name="name"
-                                            type="text"
-                                            value={formData.name}
-                                            onChange={handleChange}
-                                            onBlur={handleBlur}
-                                            onKeyDown={handleKeyDown}
-                                            className={`block w-full pl-10 pr-3 py-3 border ${errors.name && touched.name ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-purple-500'} rounded-lg focus:ring-2 focus:border-transparent transition duration-200`}
-                                            placeholder="John Doe"
-                                        />
-                                    </div>
-                                    {errors.name && touched.name && (
-                                        <p className="mt-1 text-xs text-red-500">{errors.name}</p>
-                                    )}
-                                </div>
-
-                                {/* Phone Input */}
-                                <div>
-                                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                                        Phone Number
-                                    </label>
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <Phone className="h-5 w-5 text-gray-400" />
-                                        </div>
-                                        <input
-                                            id="phone"
-                                            name="phone"
-                                            type="tel"
-                                            value={formData.phone}
-                                            onChange={handleChange}
-                                            onBlur={handleBlur}
-                                            onKeyDown={handleKeyDown}
-                                            className={`block w-full pl-10 pr-3 py-3 border ${errors.phone && touched.phone ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-purple-500'} rounded-lg focus:ring-2 focus:border-transparent transition duration-200`}
-                                            placeholder="+1 (555) 000-0000"
-                                        />
-                                    </div>
-                                    {errors.phone && touched.phone && (
-                                        <p className="mt-1 text-xs text-red-500">{errors.phone}</p>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Email - Full Width */}
-                            <div>
-                                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Email Address
-                                </label>
-                                <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <Mail className="h-5 w-5 text-gray-400" />
-                                    </div>
+                    {/* Form */}
+                    <div className="space-y-4">
+                        {/* Company Name with Logo Upload */}
+                        <div>
+                            <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 mb-2">
+                                Company Name
+                            </label>
+                            <div className="flex gap-3">
+                                <div className="relative flex-1">
                                     <input
-                                        id="email"
-                                        name="email"
-                                        type="email"
-                                        value={formData.email}
+                                        id="companyName"
+                                        name="companyName"
+                                        type="text"
+                                        value={formData.companyName}
                                         onChange={handleChange}
                                         onBlur={handleBlur}
                                         onKeyDown={handleKeyDown}
-                                        className={`block w-full pl-10 pr-3 py-3 border ${errors.email && touched.email ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-purple-500'} rounded-lg focus:ring-2 focus:border-transparent transition duration-200`}
-                                        placeholder="you@example.com"
+                                        className={`block w-full pl-10 pr-3 py-3 border-2 ${errors.companyName && touched.companyName ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-purple-500'} rounded-lg focus:ring-2 focus:border-purple-500 outline-none transition bg-white hover:border-purple-300`}
+                                        placeholder="Your Company Name"
                                     />
+                                    <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-purple-400" />
                                 </div>
-                                {errors.email && touched.email && (
-                                    <p className="mt-1 text-xs text-red-500">{errors.email}</p>
-                                )}
-                            </div>
-
-                            {/* Two Column Layout for Password Fields */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {/* Password Input */}
-                                <div>
-                                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                                        Password
+                                <div className="relative">
+                                    <input
+                                        type="file"
+                                        id="logoUpload"
+                                        accept="image/*"
+                                        onChange={handleLogoUpload}
+                                        className="hidden"
+                                    />
+                                    <label
+                                        htmlFor="logoUpload"
+                                        className="flex items-center justify-center w-12 h-12 border-2 border-dashed border-purple-300 rounded-lg cursor-pointer hover:border-purple-500 transition duration-200 bg-white hover:bg-purple-50"
+                                        title="Upload logo"
+                                    >
+                                        {logo ? (
+                                            <img src={logo} alt="Logo" className="w-full h-full object-cover rounded-lg" />
+                                        ) : (
+                                            <Upload className="h-5 w-5 text-purple-400" />
+                                        )}
                                     </label>
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <Lock className="h-5 w-5 text-gray-400" />
-                                        </div>
-                                        <input
-                                            id="password"
-                                            name="password"
-                                            type={showPassword ? 'text' : 'password'}
-                                            value={formData.password}
-                                            onChange={handleChange}
-                                            onBlur={handleBlur}
-                                            onKeyDown={handleKeyDown}
-                                            className={`block w-full pl-10 pr-10 py-3 border ${errors.password && touched.password ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-purple-500'} rounded-lg focus:ring-2 focus:border-transparent transition duration-200`}
-                                            placeholder="••••••••"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowPassword(!showPassword)}
-                                            className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                                        >
-                                            {showPassword ? (
-                                                <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                                            ) : (
-                                                <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                                            )}
-                                        </button>
-                                    </div>
-                                    {errors.password && touched.password && (
-                                        <p className="mt-1 text-xs text-red-500">{errors.password}</p>
-                                    )}
-                                </div>
-
-                                {/* Confirm Password Input */}
-                                <div>
-                                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                                        Confirm Password
-                                    </label>
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <Lock className="h-5 w-5 text-gray-400" />
-                                        </div>
-                                        <input
-                                            id="confirmPassword"
-                                            name="confirmPassword"
-                                            type={showConfirmPassword ? 'text' : 'password'}
-                                            value={formData.confirmPassword}
-                                            onChange={handleChange}
-                                            onBlur={handleBlur}
-                                            onKeyDown={handleKeyDown}
-                                            className={`block w-full pl-10 pr-10 py-3 border ${errors.confirmPassword && touched.confirmPassword ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-purple-500'} rounded-lg focus:ring-2 focus:border-transparent transition duration-200`}
-                                            placeholder="••••••••"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                            className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                                        >
-                                            {showConfirmPassword ? (
-                                                <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                                            ) : (
-                                                <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                                            )}
-                                        </button>
-                                    </div>
-                                    {errors.confirmPassword && touched.confirmPassword && (
-                                        <p className="mt-1 text-xs text-red-500">{errors.confirmPassword}</p>
-                                    )}
                                 </div>
                             </div>
-
-                            {/* Terms and Conditions */}
-                            <div className="flex items-start">
-                                <input
-                                    id="terms"
-                                    type="checkbox"
-                                    className="h-4 w-4 mt-1 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
-                                />
-                                <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
-                                    I agree to the{' '}
-                                    <a href="#" className="text-purple-600 hover:text-purple-500 font-medium">
-                                        Terms and Conditions
-                                    </a>{' '}
-                                    and{' '}
-                                    <a href="#" className="text-purple-600 hover:text-purple-500 font-medium">
-                                        Privacy Policy
-                                    </a>
-                                </label>
-                            </div>
-
-                            {/* Sign Up Button */}
-                            <button
-                                onClick={handleSubmit}
-                                disabled={isLoading}
-                                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold py-3 px-4 rounded-lg hover:from-purple-600 hover:to-pink-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transform transition duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg"
-                            >
-                                {isLoading ? (
-                                    <span className="flex items-center justify-center">
-                                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        Creating Account...
-                                    </span>
-                                ) : (
-                                    'Sign Up'
-                                )}
-                            </button>
+                            {errors.companyName && touched.companyName && (
+                                <p className="mt-1 text-xs text-red-500">{errors.companyName}</p>
+                            )}
                         </div>
 
-                        {/* Sign In Link */}
-                        <p className="mt-8 text-center text-sm text-gray-600">
-                            Already have an account?{' '}
-                            <Link to="/login" className="font-medium text-purple-600 hover:text-purple-500 transition duration-200">
-                                Sign In
-                            </Link>
-                        </p>
+                        {/* Name and Phone */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Full Name
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        id="name"
+                                        name="name"
+                                        type="text"
+                                        value={formData.name}
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                        onKeyDown={handleKeyDown}
+                                        className={`block w-full pl-10 pr-3 py-3 border-2 ${errors.name && touched.name ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-purple-500'} rounded-lg focus:ring-2 focus:border-purple-500 outline-none transition bg-white hover:border-purple-300`}
+                                        placeholder="John Doe"
+                                    />
+                                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-purple-400" />
+                                </div>
+                                {errors.name && touched.name && (
+                                    <p className="mt-1 text-xs text-red-500">{errors.name}</p>
+                                )}
+                            </div>
+
+                            <div>
+                                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Phone Number
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        id="phone"
+                                        name="phone"
+                                        type="tel"
+                                        value={formData.phone}
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                        onKeyDown={handleKeyDown}
+                                        className={`block w-full pl-10 pr-3 py-3 border-2 ${errors.phone && touched.phone ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-purple-500'} rounded-lg focus:ring-2 focus:border-purple-500 outline-none transition bg-white hover:border-purple-300`}
+                                        placeholder="+1 (555) 000-0000"
+                                    />
+                                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-purple-400" />
+                                </div>
+                                {errors.phone && touched.phone && (
+                                    <p className="mt-1 text-xs text-red-500">{errors.phone}</p>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Email */}
+                        <div>
+                            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                                Email Address
+                            </label>
+                            <div className="relative">
+                                <input
+                                    id="email"
+                                    name="email"
+                                    type="email"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    onBlur={handleBlur}
+                                    onKeyDown={handleKeyDown}
+                                    className={`block w-full pl-10 pr-3 py-3 border-2 ${errors.email && touched.email ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-purple-500'} rounded-lg focus:ring-2 focus:border-purple-500 outline-none transition bg-white hover:border-purple-300`}
+                                    placeholder="you@example.com"
+                                />
+                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-purple-400" />
+                            </div>
+                            {errors.email && touched.email && (
+                                <p className="mt-1 text-xs text-red-500">{errors.email}</p>
+                            )}
+                        </div>
+
+                        {/* Password Fields */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Password
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        id="password"
+                                        name="password"
+                                        type={showPassword ? 'text' : 'password'}
+                                        value={formData.password}
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                        onKeyDown={handleKeyDown}
+                                        className={`block w-full pl-10 pr-10 py-3 border-2 ${errors.password && touched.password ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-purple-500'} rounded-lg focus:ring-2 focus:border-purple-500 outline-none transition bg-white hover:border-purple-300`}
+                                        placeholder="••••••••"
+                                    />
+                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-purple-400" />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-purple-400 hover:text-purple-600 transition"
+                                    >
+                                        {showPassword ? (
+                                            <EyeOff className="h-5 w-5" />
+                                        ) : (
+                                            <Eye className="h-5 w-5" />
+                                        )}
+                                    </button>
+                                </div>
+                                {errors.password && touched.password && (
+                                    <p className="mt-1 text-xs text-red-500">{errors.password}</p>
+                                )}
+                            </div>
+
+                            <div>
+                                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Confirm Password
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        id="confirmPassword"
+                                        name="confirmPassword"
+                                        type={showConfirmPassword ? 'text' : 'password'}
+                                        value={formData.confirmPassword}
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                        onKeyDown={handleKeyDown}
+                                        className={`block w-full pl-10 pr-10 py-3 border-2 ${errors.confirmPassword && touched.confirmPassword ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-purple-500'} rounded-lg focus:ring-2 focus:border-purple-500 outline-none transition bg-white hover:border-purple-300`}
+                                        placeholder="••••••••"
+                                    />
+                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-purple-400" />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-purple-400 hover:text-purple-600 transition"
+                                    >
+                                        {showConfirmPassword ? (
+                                            <EyeOff className="h-5 w-5" />
+                                        ) : (
+                                            <Eye className="h-5 w-5" />
+                                        )}
+                                    </button>
+                                </div>
+                                {errors.confirmPassword && touched.confirmPassword && (
+                                    <p className="mt-1 text-xs text-red-500">{errors.confirmPassword}</p>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Sign Up Button */}
+                        <button
+                            onClick={handleSubmit}
+                            disabled={isLoading}
+                            className="w-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 text-white font-medium py-3 rounded-lg transition duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {isLoading ? 'Creating Account...' : 'Sign Up'}
+                        </button>
+                    </div>
+
+                    {/* Sign In Link */}
+                    <p className="mt-6 text-center text-sm text-gray-600">
+                        Already have an account?{' '}
+                        <Link to="/login" className="text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text font-semibold hover:from-blue-700 hover:to-purple-700">
+                            Sign in
+                        </Link>
+                    </p>
+                </div>
+            </div>
+
+            {/* Right Column - Abstract Image Background */}
+            <div className="relative overflow-hidden min-h-screen hidden lg:block">
+                <div className="absolute inset-0">
+                    {/* Gradient background with animated layers */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 flex items-center justify-center p-12">
+                        {/* Animated gradient orbs */}
+                        <div className="absolute top-0 left-0 w-96 h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
+                        <div className="absolute top-0 right-0 w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
+                        <div className="absolute bottom-0 left-1/2 w-96 h-96 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
+                        
+                        <div className="text-center text-white max-w-2xl relative z-10">
+                            <h2 className="text-4xl md:text-5xl font-bold mb-6 drop-shadow-lg">
+                                Join DayFlow HRM
+                            </h2>
+                            <blockquote className="text-xl md:text-2xl font-light italic opacity-90 drop-shadow-md">
+                                "Transform your HR operations with our powerful, intuitive platform designed for modern workplaces."
+                            </blockquote>
+                        </div>
                     </div>
                 </div>
             </div>

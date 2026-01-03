@@ -1,4 +1,5 @@
 import { User, LogOut, Clock, Users, FileCheck } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 // Navbar Component
 function AdminNav({ showProfileMenu, setShowProfileMenu, currentPage }) {
@@ -50,10 +51,10 @@ function AdminNav({ showProfileMenu, setShowProfileMenu, currentPage }) {
                             </button>
                             {showProfileMenu && (
                                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50 border border-gray-200">
-                                    <button className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2 text-gray-700 transition duration-200">
+                                    <Link to="/profile" className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2 text-gray-700 transition duration-200">
                                         <User className="w-4 h-4" />
                                         <span>My Profile</span>
-                                    </button>
+                                    </Link>
                                     <div className="border-t border-gray-200 my-1"></div>
                                     <button className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2 text-red-600 transition duration-200">
                                         <LogOut className="w-4 h-4" />
