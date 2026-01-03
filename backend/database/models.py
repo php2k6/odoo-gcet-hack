@@ -98,7 +98,7 @@ class Resume(Base):
     __tablename__ = "resume"
     
     emp_id = Column(String, ForeignKey("employee.id"), primary_key=True)
-    about = Column(BigInteger)
+    about = Column(Text)
     skills = Column(Text)
     certification = Column(Text)
     
