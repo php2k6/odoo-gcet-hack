@@ -2,12 +2,13 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from database.database import engine, Base
 from database import models
+from routers import auth
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
-    title="FastAPI App",
+    title="GCET Employee Management System",
     debug=True
 )
 
@@ -20,10 +21,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Include routers
+app.include_router(auth.router)
+
 
 @app.get("/")
 async def root():
-    return {"message": "Welcome to FastAPI"}
+    return {"message": "Welcome to GCET Employee Management System"}
 
 
 @app.get("/health")
