@@ -9,7 +9,7 @@ class CompanySignup(BaseModel):
     email: EmailStr
     password: str
     phone: Optional[str] = None
-    logo: Optional[bytes] = None
+    logo: Optional[str] = None  # Base64 encoded string
 
 
 class CompanyLogin(BaseModel):
@@ -22,7 +22,7 @@ class CompanyResponse(BaseModel):
     company_name: Optional[str] = None
     email: str
     phone: Optional[str] = None
-    logo: Optional[bytes] = None
+    logo: Optional[str] = None  # Base64 encoded logo
     role: str = "admin"
     
     class Config:

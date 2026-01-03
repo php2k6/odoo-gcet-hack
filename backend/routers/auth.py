@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from typing import Optional
+import base64
 from database.database import get_db
 from database.models import Company, Employee
 from schemas.auth import (
@@ -28,13 +30,24 @@ async def company_signup(
             detail="Email already registered"
         )
     
+    # Convert base64 logo to bytes if provided
+    logo_bytes = None
+    if company_data.logo:
+        try:
+            logo_bytes = base64.b64decode(company_data.logo)
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid base64 logo format"
+            )
+    
     # Create new company
     new_company = Company(
         company_name=company_data.company_name,
         email=company_data.email,
         password=get_password_hash(company_data.password),
         phone=company_data.phone,
-        logo=company_data.logo
+        logo=logo_bytes
     )
     
     db.add(new_company)
@@ -47,7 +60,7 @@ async def company_signup(
         company_name=new_company.company_name,
         email=new_company.email,
         phone=new_company.phone,
-        logo=new_company.logo,
+        logo=base64.b64encode(new_company.logo).decode('utf-8') if new_company.logo else None,
         role="admin"
     )
     
@@ -97,7 +110,7 @@ async def get_company_profile(
         company_name=current_company.company_name,
         email=current_company.email,
         phone=current_company.phone,
-        logo=current_company.logo,
+        logo=base64.b64encode(current_company.logo).decode('utf-8') if current_company.logo else None,
         role="admin"
     )
 
