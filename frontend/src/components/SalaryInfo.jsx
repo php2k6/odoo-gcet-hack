@@ -1,33 +1,17 @@
 import React from 'react';
 import { Calendar, FileText, TrendingUp, DollarSign, Percent, Edit, Save, X } from 'lucide-react';
 
-export default function SalaryInfo({ 
-    isAdmin, 
-    salaryData, 
-    isEditing, 
-    onEdit, 
-    onSave, 
-    onCancel, 
-    editableData, 
+export default function SalaryInfo({
+    isAdmin,
+    salaryData,
+    isEditing,
+    onEdit,
+    onSave,
+    onCancel,
+    editableData,
     onFieldChange,
-    isLoading 
+    isLoading
 }) {
-    isLoading 
-}) {
-    // Use provided salaryData or fallback to demo data
-    const defaultSalaryData = {
-        monthly_wage: 50000,
-        yearly_wage: 600000,
-        basic_sal: 25000,
-        hra: 12500,
-        sa: 4167,
-        perf_bonus: 2092.50,
-        ita: 2092.50,
-        fa: 2918,
-        pf1: 3000,
-        pf2: 3000,
-        prof_tax: 200
-    };
 
     const displayData = isEditing ? editableData : (salaryData || defaultSalaryData);
 
@@ -66,7 +50,7 @@ export default function SalaryInfo({
                     )}
                 </div>
             )}
-            
+
             {/* Header Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-6 rounded-xl text-white shadow-lg">

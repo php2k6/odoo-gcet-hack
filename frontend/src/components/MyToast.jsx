@@ -1,7 +1,7 @@
 import { Toast, ToastToggle } from "flowbite-react";
 import { HiCheck, HiExclamation, HiX } from "react-icons/hi";
 
-export function MyToast({ type, message }) {
+export default function MyToast({ type, message, onClose }) {
     const iconMap = {
         success: <HiCheck className="h-5 w-5" />,
         error: <HiX className="h-5 w-5" />,
@@ -15,13 +15,13 @@ export function MyToast({ type, message }) {
     };
 
     return (
-        <div className="flex flex-col gap-4 fixed bottom-4 right-4">
+        <div className="flex flex-col gap-4 fixed bottom-4 right-4 z-50">
             <Toast>
                 <div className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${bgColorMap[type]}`}>
                     {iconMap[type]}
                 </div>
                 <div className="ml-3 text-sm font-normal">{message}</div>
-                <ToastToggle />
+                <ToastToggle onDismiss={onClose} />
             </Toast>
             
         </div>

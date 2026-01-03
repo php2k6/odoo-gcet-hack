@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, Eye, EyeOff } from 'lucide-react';
-import { MyToast } from "../components/MyToast";
+import MyToast from "../components/MyToast";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from '../context/AuthContext';
 
@@ -41,10 +41,10 @@ export default function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        // Validate if identifier contains @ (email) before submitting
-        if (identifier.includes('@') && !validateEmail(identifier)) {
+        // Validate email format for admin login
+        if (role === 'admin' && !validateEmail(identifier)) {
             setToast({
-                message: 'Please enter a valid email address',
+                message: 'Please enter a valid email address for admin login',
                 type: 'error'
             });
             return;
@@ -52,7 +52,7 @@ export default function Login() {
         
         if (!identifier.trim()) {
             setToast({
-                message: 'Please enter your email or employee ID',
+                message: role === 'admin' ? 'Please enter your email' : 'Please enter your employee ID',
                 type: 'error'
             });
             return;
@@ -61,9 +61,8 @@ export default function Login() {
         setIsLoading(true);
         
         try {
-            // Determine if identifier is email or ID
-            const isEmail = identifier.includes('@');
-            const loginData = isEmail 
+            // Prepare login data based on role
+            const loginData = role === 'admin'
                 ? { email: identifier, password, role }
                 : { id: identifier, password, role };
             
@@ -117,7 +116,7 @@ export default function Login() {
                         {/* Email or Employee ID Input */}
                         <div>
                             <label htmlFor="identifier" className="block text-sm font-medium text-gray-700 mb-2">
-                                Email / Employee ID
+                                {role === 'admin' ? 'Email' : 'Employee ID'}
                             </label>
                             <div className="relative">
                                 <input
@@ -125,7 +124,7 @@ export default function Login() {
                                     id="identifier"
                                     value={identifier}
                                     onChange={handleIdentifierChange}
-                                    placeholder="email@example.com or EMP001"
+                                    placeholder={role === 'admin' ? 'email@example.com' : 'EMP001'}
                                     className={`w-full px-4 py-3 pr-10 border-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition bg-white hover:border-purple-300 ${
                                         emailError ? 'border-red-300' : 'border-gray-200'
                                     }`}

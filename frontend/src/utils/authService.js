@@ -5,12 +5,19 @@ export const authService = {
   // Login function
   async login(credentials) {
     try {
-      const { email, password, role } = credentials;
+      const { email, id, password, role } = credentials;
       
       // Determine endpoint based on role
       const endpoint = role === 'admin' ? '/auth/company/login' : '/auth/employee/login';
       
-      const response = await api.post(endpoint, { email, password });
+      // Prepare request body based on role
+      // Admin: { email, password } -> /auth/company/login
+      // Employee: { id, password } -> /auth/employee/login
+      const requestBody = role === 'admin' 
+        ? { email, password }
+        : { id, password };
+      
+      const response = await api.post(endpoint, requestBody);
       const { access_token, token_type } = response.data;
       
       // Store token
@@ -19,7 +26,8 @@ export const authService = {
       
       // Create user object with role
       const user = {
-        email,
+        email: email || id,
+        id: id || email,
         role,
         isAdmin: role === 'admin'
       };

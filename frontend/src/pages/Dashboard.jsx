@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plane, XCircle, User, Calendar, FileText, LogOut, Bell, Edit } from 'lucide-react';
+import { Search, Plane, XCircle, User, Calendar, FileText, LogOut, Bell, Edit, UserPlus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import EmployeeNav from '../components/EmployeeNav.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -159,6 +159,13 @@ export default function Dashboard() {
           >
             {loading ? 'LOADING...' : 'REFRESH'}
           </button>
+          <Link
+            to="/employee-registration"
+            className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg font-medium hover:from-green-600 hover:to-emerald-600 transition duration-200 shadow-md hover:shadow-lg transform hover:scale-105 flex items-center justify-center"
+          >
+            <UserPlus className="w-5 h-5 mr-2" />
+            Add Employee
+          </Link>
           <div className="relative flex-1">
             <input
               type="text"
