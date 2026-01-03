@@ -72,7 +72,7 @@ class LeaveTable(Base):
     emp_id = Column(String, ForeignKey("employee.id"), nullable=False)
     start_date = Column(Date)
     leave_type = Column(Text)
-    end_date = Column(BigInteger)
+    end_date = Column(Date)
     is_approved = Column(Boolean)
     
     # Relationships
