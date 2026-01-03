@@ -149,7 +149,7 @@ class SalaryCreate(BaseModel):
 
 
 class ResumeCreate(BaseModel):
-    about: int
+    about: str
     skills: str
     certification: str
 
