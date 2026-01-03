@@ -1,4 +1,4 @@
-# 🏢 GCET Employee Management System
+# 🏢 DataFlow HRM Software
 
 A comprehensive full-stack HRMS (Human Resource Management System) built for managing employees, attendance, leaves, and salaries with role-based access control.
 
