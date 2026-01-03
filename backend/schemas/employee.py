@@ -14,7 +14,7 @@ class EmployeeResponse(BaseModel):
     manager: Optional[str] = None
     location: Optional[str] = None
     job_position: Optional[str] = None
-    prof_pic: Optional[bytes] = None
+    prof_pic: Optional[str] = None  # Base64 encoded
     current_status: Optional[int] = None
     
     class Config:

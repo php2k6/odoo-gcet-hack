@@ -93,7 +93,7 @@ class EmployeeResponse(BaseModel):
     location: Optional[str] = None
     job_position: Optional[str] = None
     resume: Optional[str] = None
-    prof_pic: Optional[bytes] = None
+    prof_pic: Optional[str] = None  # Base64 encoded
     current_status: Optional[int] = None
     role: str = "employee"
     private_info: Optional[PrivateInfoResponse] = None

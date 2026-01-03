@@ -164,7 +164,7 @@ async def get_employee_profile(
         manager=current_employee.manager,
         location=current_employee.location,
         job_position=current_employee.job_position,
-        prof_pic=current_employee.prof_pic,
+        prof_pic=base64.b64encode(current_employee.prof_pic).decode('utf-8') if current_employee.prof_pic else None,
         current_status=current_employee.current_status,
         role="employee",
         private_info=current_employee.private_info,
