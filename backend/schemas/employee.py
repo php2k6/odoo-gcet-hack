@@ -65,7 +65,7 @@ class SalaryResponse(BaseModel):
 
 class ResumeResponse(BaseModel):
     emp_id: str
-    about: Optional[int] = None
+    about: Optional[str] = None
     skills: Optional[str] = None
     certification: Optional[str] = None
     
@@ -193,7 +193,7 @@ class EmployeeUpdate(BaseModel):
 
 # Resume Update Schema
 class ResumeUpdate(BaseModel):
-    about: Optional[int] = None
+    about: Optional[str] = None
     skills: Optional[str] = None
     certification: Optional[str] = None
 
