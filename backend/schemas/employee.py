@@ -155,10 +155,7 @@ class ResumeCreate(BaseModel):
 
 
 class EmployeeCreate(BaseModel):
-    name: str
-    first_name: str  # For ID generation
-    last_name: str   # For ID generation
-    year_of_joining: int  # For ID generation
+    name: str  # Full name (will be split for ID generation)
     phone: str
     department: str
     email: EmailStr
@@ -176,7 +173,6 @@ class EmployeeCreate(BaseModel):
 
 class EmployeeCreateResponse(BaseModel):
     id: str
-    password: str
     name: str
     email: EmailStr
     message: str

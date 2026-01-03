@@ -15,16 +15,22 @@ from datetime import datetime
 router = APIRouter(prefix="/employees", tags=["Employees"])
 
 
-def generate_employee_id(db: Session, company_name: str, first_name: str, last_name: str, year: int) -> tuple[str, int]:
+def generate_employee_id(db: Session, company_name: str, full_name: str, year: int) -> tuple[str, int]:
     """
     Generate employee ID in format: [Company][Name][Year][Serial]
-    Example: OIJODO20220001
+    Example: NIPA20220001 (from Nisarg Panchal)
     """
     # Get first 2 letters of company name
     company_code = company_name[:2].upper()
     
-    # Get first 2 letters of first and last name
-    name_code = (first_name[:2] + last_name[:2]).upper()
+    # Split full name and get first 2 letters from each part
+    name_parts = full_name.strip().split()
+    if len(name_parts) >= 2:
+        # Take first 2 letters of first name and first 2 letters of last name
+        name_code = (name_parts[0][:2] + name_parts[1][:2]).upper()
+    else:
+        # If only one name, take first 4 letters
+        name_code = name_parts[0][:4].upper().ljust(4, 'X')
     
     # Get serial number for this year
     year_prefix = f"{company_code}{name_code}{year}"
@@ -42,7 +48,7 @@ def generate_employee_id(db: Session, company_name: str, first_name: str, last_n
 def generate_password(employee_id: str) -> str:
     """
     Generate password based on employee ID
-    For now using the employee ID as password (should be hashed in production)
+    This will be hashed before storing in database
     """
     return employee_id
 
@@ -79,13 +85,15 @@ async def create_employee(
             detail="Email already registered"
         )
     
+    # Extract year from doj (date of joining)
+    year_of_joining = employee_data.private_info.doj.year
+    
     # Generate employee ID and password
     employee_id, serial = generate_employee_id(
         db,
         current_company.company_name,
-        employee_data.first_name,
-        employee_data.last_name,
-        employee_data.year_of_joining
+        employee_data.name,
+        year_of_joining
     )
     password = generate_password(employee_id)
     
@@ -94,7 +102,7 @@ async def create_employee(
         id=employee_id,
         company_id=current_company.id,
         name=employee_data.name,
-        password=password,  # TODO: Hash password in production
+        password=get_password_hash(password),
         phone=employee_data.phone,
         department=employee_data.department,
         email=employee_data.email,
