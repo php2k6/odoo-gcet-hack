@@ -37,7 +37,7 @@ A comprehensive full-stack HRMS (Human Resource Management System) built for man
 - **Routing**: React Router DOM 7.11.0
 - **Styling**: TailwindCSS 4.1.18 with Flowbite React
 - **HTTP Client**: Axios 1.13.2
-- **Icons**: Lucide React, React Icons
+- **Icons**: Lucide React, React Icon
 - **OAuth**: Google OAuth integration
 ##  Screnshots
 ### Admin
