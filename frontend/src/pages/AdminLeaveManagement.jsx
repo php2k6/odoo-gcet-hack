@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Shield, CheckCircle, XCircle, AlertCircle, Search, Filter, Calendar, User } from 'lucide-react';
+import EmployeeNav from '../components/EmployeeNav';
 
 export default function AdminLeaveManagement() {
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
   // Sample data - in real app, this would come from backend API
   const [leaves, setLeaves] = useState([
     { 
@@ -160,6 +162,7 @@ export default function AdminLeaveManagement() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50">
+      <EmployeeNav showProfileMenu={showProfileMenu} setShowProfileMenu={setShowProfileMenu} />
       <div className="max-w-7xl mx-auto p-6">
         {/* Header */}
         <div className="mb-8 mt-8">

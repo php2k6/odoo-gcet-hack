@@ -12,7 +12,7 @@ import Signup from './pages/Signup.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import Profile from './pages/Profile.jsx'
 import EmployeeAttendance from './pages/EmployeeAttendance.jsx'
-import EmployeeLeave from './pages/EmployeeLeave.jsx'
+import AdminLeaveManagement from './pages/AdminLeaveManagement.jsx'
 import AttendancePage from './pages/AttendancePage.jsx'
 import NotFound from './pages/NotFound.jsx'
 
@@ -71,7 +71,7 @@ const router = createBrowserRouter([
           },
           {
             path: 'leave',
-            element: <EmployeeLeave />,
+            element: <AdminLeaveManagement />,
           },
         ],
       },

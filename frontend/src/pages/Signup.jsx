@@ -159,22 +159,34 @@ export default function Signup() {
 
         try {
             // Call signup function from context
-            await signup({
-                name: formData.name,
-                email: formData.email,
-                phone: formData.phone,
-                password: formData.password,
+            // Backend expects: company_name, email, password
+            const result = await signup({
                 companyName: formData.companyName,
-                logo: logo
+                email: formData.email,
+                password: formData.password
             });
+            
+            console.log('Signup successful:', result);
             
             // Redirect to dashboard on success
             navigate('/dashboard');
         } catch (error) {
             console.error('Signup error:', error);
+            
+            // Extract error message from response
+            let errorMessage = 'Signup failed. Please try again.';
+            
+            if (error.response?.data?.message) {
+                errorMessage = error.response.data.message;
+            } else if (error.response?.data?.error) {
+                errorMessage = error.response.data.error;
+            } else if (error.message) {
+                errorMessage = error.message;
+            }
+            
             setErrors({
                 ...errors,
-                submit: error.response?.data?.message || 'Signup failed. Please try again.'
+                submit: errorMessage
             });
         } finally {
             setIsLoading(false);
@@ -399,6 +411,20 @@ export default function Signup() {
                                 )}
                             </div>
                         </div>
+
+                        {/* Error Message Display */}
+                        {errors.submit && (
+                            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start">
+                                <div className="flex-shrink-0">
+                                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                                    </svg>
+                                </div>
+                                <div className="ml-3">
+                                    <p className="text-sm text-red-700">{errors.submit}</p>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Sign Up Button */}
                         <button

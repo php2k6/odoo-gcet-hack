@@ -253,7 +253,14 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              <div className="mt-8 flex justify-end">
+              <div className="mt-8 flex justify-end space-x-3">
+                <Link
+                  to={`/profile?id=${selectedEmployee.id}`}
+                  className="px-6 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg font-medium hover:from-blue-600 hover:to-blue-700 transition duration-200 shadow-md flex items-center"
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit Full Profile
+                </Link>
                 <button
                   onClick={closeEmployeeView}
                   className="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium hover:from-purple-600 hover:to-pink-600 transition duration-200 shadow-md"
