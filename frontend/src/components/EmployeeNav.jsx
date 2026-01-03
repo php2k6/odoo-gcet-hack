@@ -111,12 +111,14 @@ function EmployeeNav({ showProfileMenu, setShowProfileMenu }) {
 
     return (
         <header className="bg-white shadow-sm border-b border-gray-200">
-            <MyToast 
-                show={toast.show}
-                message={toast.message}
-                type={toast.type}
-                onClose={() => setToast({ show: false, message: '', type: '' })}
-            />
+            {toast.show && (
+                <MyToast 
+                    show={toast.show}
+                    message={toast.message}
+                    type={toast.type}
+                    onClose={() => setToast({ show: false, message: '', type: '' })}
+                />
+            )}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-8">
@@ -134,9 +136,9 @@ function EmployeeNav({ showProfileMenu, setShowProfileMenu }) {
                                 <Clock className="w-4 h-4" />
                                 <span>Attendance</span>
                             </Link>
-                            <Link to="/employee/leave" className="px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100">
+                            <Link to={isAdmin ? "/admin/leave" : "/employee/leave"} className="px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100">
                                 <FileCheck className="w-4 h-4" />
-                                <span>Leave Requests</span>
+                                <span>{isAdmin ? "Leave Management" : "My Leaves"}</span>
                             </Link>
                         </nav>
                     </div>

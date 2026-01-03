@@ -1,47 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Calendar, CheckCircle, XCircle, AlertCircle, Plus, User, FileText } from 'lucide-react';
 import EmployeeNav from '../components/EmployeeNav';
+import api from '../utils/api';
+import MyToast from '../components/MyToast';
 
 export default function EmployeeLeave() {
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [showApplyForm, setShowApplyForm] = useState(false);
-    
-    // Sample employee leave data - would come from backend based on logged-in employee
-    const [leaves, setLeaves] = useState([
-        { 
-            id: 1, 
-            type: 'Paid', 
-            startDate: '2026-01-15', 
-            endDate: '2026-01-17', 
-            days: 3,
-            remarks: 'Family vacation', 
-            status: 'Pending',
-            appliedDate: '2026-01-05',
-            adminComment: '' 
-        },
-        { 
-            id: 2, 
-            type: 'Sick', 
-            startDate: '2025-12-20', 
-            endDate: '2025-12-21', 
-            days: 2,
-            remarks: 'Medical checkup', 
-            status: 'Approved',
-            appliedDate: '2025-12-15',
-            adminComment: 'Approved. Get well soon!' 
-        },
-        { 
-            id: 3, 
-            type: 'Paid', 
-            startDate: '2025-11-10', 
-            endDate: '2025-11-12', 
-            days: 3,
-            remarks: 'Personal work', 
-            status: 'Rejected',
-            appliedDate: '2025-11-05',
-            adminComment: 'Project deadline approaching. Please reschedule.' 
-        }
-    ]);
+    const [leaves, setLeaves] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [toast, setToast] = useState({ show: false, message: '', type: '' });
+    const [filterStatus, setFilterStatus] = useState('All');
 
     const [newLeave, setNewLeave] = useState({
         type: 'Paid',
@@ -49,6 +19,46 @@ export default function EmployeeLeave() {
         endDate: '',
         remarks: ''
     });
+
+    // Fetch employee leave requests
+    useEffect(() => {
+        fetchLeaves();
+    }, []);
+
+    const fetchLeaves = async () => {
+        setLoading(true);
+        setError(null);
+        
+        try {
+            const response = await api.get('/leaves/emp');
+            const data = response.data;
+            
+            // Map API response to component format
+            const mappedLeaves = (data.leaves || []).map(leave => ({
+                id: leave.leave_id,
+                type: leave.leave_type,
+                startDate: leave.start_date,
+                endDate: leave.end_date,
+                days: calculateDays(leave.start_date, leave.end_date),
+                status: leave.is_approved === true ? 'Approved' : (leave.is_approved === null || leave.is_approved === undefined) ? 'Pending' : 'Rejected',
+                appliedDate: leave.start_date, // Using start_date as applied date for now
+                remarks: '',
+                adminComment: ''
+            }));
+            
+            setLeaves(mappedLeaves);
+        } catch (err) {
+            console.error('Error fetching leaves:', err);
+            setError(err.response?.data?.message || 'Failed to fetch leave requests');
+            setToast({
+                show: true,
+                message: err.response?.data?.message || 'Failed to fetch leave requests',
+                type: 'error'
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const calculateDays = (start, end) => {
         if (!start || !end) return 0;
@@ -59,25 +69,41 @@ export default function EmployeeLeave() {
         return diffDays;
     };
 
-    const handleSubmitLeave = (e) => {
+    const handleSubmitLeave = async (e) => {
         e.preventDefault();
-        const days = calculateDays(newLeave.startDate, newLeave.endDate);
+        setLoading(true);
         
-        const leaveRequest = {
-            id: leaves.length + 1,
-            ...newLeave,
-            days,
-            status: 'Pending',
-            appliedDate: new Date().toISOString().slice(0, 10),
-            adminComment: ''
-        };
-
-        setLeaves([leaveRequest, ...leaves]);
-        setNewLeave({ type: 'Paid', startDate: '', endDate: '', remarks: '' });
-        setShowApplyForm(false);
-        
-        // In real app, send to backend API
-        // await fetch('/api/leaves/apply', { method: 'POST', body: JSON.stringify(leaveRequest) });
+        try {
+            const leaveData = {
+                start_date: newLeave.startDate,
+                end_date: newLeave.endDate,
+                leave_type: newLeave.type
+            };
+            
+            await api.post('/leaves/request', leaveData);
+            
+            setToast({
+                show: true,
+                message: 'Leave request submitted successfully!',
+                type: 'success'
+            });
+            
+            // Reset form and close modal
+            setNewLeave({ type: 'Paid', startDate: '', endDate: '', remarks: '' });
+            setShowApplyForm(false);
+            
+            // Refresh leave list
+            fetchLeaves();
+        } catch (err) {
+            console.error('Error submitting leave:', err);
+            setToast({
+                show: true,
+                message: err.response?.data?.message || 'Failed to submit leave request',
+                type: 'error'
+            });
+        } finally {
+            setLoading(false);
+        }
     };
 
     const getStatusIcon = (status) => {
@@ -111,6 +137,14 @@ export default function EmployeeLeave() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50" onClick={() => setShowProfileMenu(false)}>
+            {toast.show && (
+                <MyToast 
+                    show={toast.show}
+                    message={toast.message}
+                    type={toast.type}
+                    onClose={() => setToast({ show: false, message: '', type: '' })}
+                />
+            )}
             <EmployeeNav 
                 showProfileMenu={showProfileMenu} 
                 setShowProfileMenu={setShowProfileMenu}
@@ -144,95 +178,92 @@ export default function EmployeeLeave() {
 
                 {/* Apply Leave Form */}
                 {showApplyForm && (
-                    <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border-2 border-purple-200">
-                        <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                            <FileText className="w-6 h-6 text-purple-600" />
-                            Apply for New Leave
-                        </h2>
-                        <form onSubmit={handleSubmitLeave}>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                        Leave Type
-                                    </label>
-                                    <select
-                                        value={newLeave.type}
-                                        onChange={(e) => setNewLeave({ ...newLeave, type: e.target.value })}
-                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition"
-                                        required
-                                    >
-                                        <option value="Paid">Paid Leave</option>
-                                        <option value="Sick">Sick Leave</option>
-                                        <option value="Unpaid">Unpaid Leave</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                        Duration: {calculateDays(newLeave.startDate, newLeave.endDate)} days
-                                    </label>
-                                    <div className="text-sm text-gray-500">
-                                        Calculated from start to end date
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => setShowApplyForm(false)}>
+                        <div className="bg-white rounded-xl shadow-2xl p-6 max-w-2xl w-full border-2 border-purple-200" onClick={(e) => e.stopPropagation()}>
+                            <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                <FileText className="w-6 h-6 text-purple-600" />
+                                Apply for New Leave
+                            </h2>
+                            <form onSubmit={handleSubmitLeave}>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                            Leave Type
+                                        </label>
+                                        <select
+                                            value={newLeave.type}
+                                            onChange={(e) => setNewLeave({ ...newLeave, type: e.target.value })}
+                                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition"
+                                            required
+                                            disabled={loading}
+                                        >
+                                            <option value="Paid">Paid Leave</option>
+                                            <option value="Sick">Sick Leave</option>
+                                            <option value="Casual">Casual Leave</option>
+                                            <option value="Unpaid">Unpaid Leave</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                            Duration: {calculateDays(newLeave.startDate, newLeave.endDate)} days
+                                        </label>
+                                        <div className="text-sm text-gray-500">
+                                            Calculated from start to end date
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                            Start Date
+                                        </label>
+                                        <input
+                                            type="date"
+                                            value={newLeave.startDate}
+                                            onChange={(e) => setNewLeave({ ...newLeave, startDate: e.target.value })}
+                                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition"
+                                            required
+                                            disabled={loading}
+                                            min={new Date().toISOString().split('T')[0]}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                            End Date
+                                        </label>
+                                        <input
+                                            type="date"
+                                            value={newLeave.endDate}
+                                            onChange={(e) => setNewLeave({ ...newLeave, endDate: e.target.value })}
+                                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition"
+                                            required
+                                            disabled={loading}
+                                            min={newLeave.startDate || new Date().toISOString().split('T')[0]}
+                                        />
                                     </div>
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                        Start Date
-                                    </label>
-                                    <input
-                                        type="date"
-                                        value={newLeave.startDate}
-                                        onChange={(e) => setNewLeave({ ...newLeave, startDate: e.target.value })}
-                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition"
-                                        required
-                                    />
+                                <div className="flex gap-3">
+                                    <button
+                                        type="submit"
+                                        disabled={loading}
+                                        className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 px-6 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {loading ? 'Submitting...' : 'Submit Leave Request'}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowApplyForm(false)}
+                                        disabled={loading}
+                                        className="px-6 py-3 rounded-lg border-2 border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-all disabled:opacity-50"
+                                    >
+                                        Cancel
+                                    </button>
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                        End Date
-                                    </label>
-                                    <input
-                                        type="date"
-                                        value={newLeave.endDate}
-                                        onChange={(e) => setNewLeave({ ...newLeave, endDate: e.target.value })}
-                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition"
-                                        required
-                                    />
-                                </div>
-                            </div>
-                            <div className="mb-4">
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                    Remarks
-                                </label>
-                                <textarea
-                                    value={newLeave.remarks}
-                                    onChange={(e) => setNewLeave({ ...newLeave, remarks: e.target.value })}
-                                    rows="3"
-                                    placeholder="Reason for leave..."
-                                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition resize-none"
-                                    required
-                                />
-                            </div>
-                            <div className="flex gap-3">
-                                <button
-                                    type="submit"
-                                    className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 px-6 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all transform hover:scale-105"
-                                >
-                                    Submit Leave Request
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setShowApplyForm(false)}
-                                    className="px-6 py-3 rounded-lg border-2 border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-all"
-                                >
-                                    Cancel
-                                </button>
-                            </div>
-                        </form>
+                            </form>
+                        </div>
                     </div>
                 )}
 
                 {/* Statistics Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
                     <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
                         <div className="flex items-center justify-between">
                             <div>
@@ -274,15 +305,37 @@ export default function EmployeeLeave() {
                     </div>
                 </div>
 
+                {/* Filter */}
+                <div className="bg-white rounded-xl shadow-lg p-4 mb-6">
+                    <div className="flex items-center gap-3">
+                        <label className="text-sm font-semibold text-gray-700">Filter by Status:</label>
+                        <select
+                            value={filterStatus}
+                            onChange={(e) => setFilterStatus(e.target.value)}
+                            className="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition"
+                        >
+                            <option value="All">All Status</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Approved">Approved</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
+                    </div>
+                </div>
+
                 {/* Leave History */}
                 <div className="bg-white rounded-xl shadow-lg overflow-hidden">
                     <div className="p-6 border-b border-gray-200">
                         <h2 className="text-xl font-bold text-gray-800">
-                            My Leave History ({leaves.length})
+                            My Leave History ({leaves.filter(l => filterStatus === 'All' || l.status === filterStatus).length})
                         </h2>
                     </div>
 
-                    {leaves.length === 0 ? (
+                    {loading && !leaves.length ? (
+                        <div className="text-center py-16">
+                            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mb-4"></div>
+                            <p className="text-gray-600">Loading leave requests...</p>
+                        </div>
+                    ) : leaves.length === 0 ? (
                         <div className="text-center py-16 text-gray-500">
                             <Calendar className="w-16 h-16 mx-auto mb-4 opacity-30" />
                             <p className="text-lg">No leave requests found</p>
@@ -290,7 +343,9 @@ export default function EmployeeLeave() {
                         </div>
                     ) : (
                         <div className="divide-y divide-gray-200">
-                            {leaves.map((leave) => (
+                            {leaves
+                                .filter(l => filterStatus === 'All' || l.status === filterStatus)
+                                .map((leave) => (
                                 <div
                                     key={leave.id}
                                     className={`p-6 hover:bg-gray-50 transition-colors ${

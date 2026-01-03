@@ -292,10 +292,38 @@ export default function Profile() {
     
     // Handle salary field changes
     const handleSalaryFieldChange = (field, value) => {
-        setEditableSalaryData(prev => ({
-            ...prev,
-            [field]: value
-        }));
+        setEditableSalaryData(prev => {
+            const newData = { ...prev };
+            const numValue = parseFloat(value) || 0;
+            
+            // Handle monthly/yearly wage auto-calculation
+            if (field === 'monthly_wage') {
+                newData.monthly_wage = numValue;
+                newData.yearly_wage = numValue * 12;
+            } else if (field === 'yearly_wage') {
+                newData.yearly_wage = numValue;
+                newData.monthly_wage = numValue / 12;
+            }
+            // Handle percentage-based calculations
+            else if (field.endsWith('_percent')) {
+                const baseField = field.replace('_percent', '');
+                const monthlyWage = newData.monthly_wage || 0;
+                newData[field] = numValue;
+                newData[baseField] = (monthlyWage * numValue) / 100;
+            }
+            // Handle direct amount input (update percentage too)
+            else if (['basic_sal', 'hra', 'sa', 'perf_bonus', 'ita', 'fa', 'pf1', 'pf2', 'prof_tax'].includes(field)) {
+                newData[field] = numValue;
+                const monthlyWage = newData.monthly_wage || 0;
+                if (monthlyWage > 0) {
+                    newData[field + '_percent'] = (numValue / monthlyWage) * 100;
+                }
+            } else {
+                newData[field] = value;
+            }
+            
+            return newData;
+        });
     };
     
     // Handle basic info save
@@ -669,12 +697,17 @@ export default function Profile() {
                     </div>
 
                     {/* Tabs */}
-                    <div clasavailableTabs>
+                    <div className="border-b border-gray-200">
                         <div className="flex">
                             {['resume', 'private-info', 'salary-info'].map((tab) => (
                                 <button
                                     key={tab}
-                                    onClick={() => setActiveTab(tab)}
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        setActiveTab(tab);
+                                    }}
                                     className={`px-6 py-4 font-medium transition-colors relative ${activeTab === tab
                                             ? 'text-blue-600 border-b-2 border-blue-600'
                                             : 'text-gray-500 hover:text-gray-700'
