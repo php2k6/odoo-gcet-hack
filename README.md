@@ -2,7 +2,7 @@
 
 A comprehensive full-stack HRMS (Human Resource Management System) built for managing employees, attendance, leaves, and salaries with role-based access control.
 
-# DATABASE SCHEMA 
+# Databse Schema 
 
 <img width="1190" height="873" alt="image" src="https://github.com/user-attachments/assets/55b609fb-7d1b-4b56-9ddd-10d854535f30" />
 
