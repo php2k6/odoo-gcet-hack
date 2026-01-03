@@ -68,7 +68,6 @@ class ResumeResponse(BaseModel):
     about: Optional[int] = None
     skills: Optional[str] = None
     certification: Optional[str] = None
-    column_0: Optional[int] = None
     
     class Config:
         from_attributes = True
@@ -153,7 +152,6 @@ class ResumeCreate(BaseModel):
     about: Optional[int] = None
     skills: Optional[str] = None
     certification: Optional[str] = None
-    column_0: Optional[int] = None
 
 
 class EmployeeCreate(BaseModel):
@@ -202,7 +200,6 @@ class ResumeUpdate(BaseModel):
     about: Optional[int] = None
     skills: Optional[str] = None
     certification: Optional[str] = None
-    column_0: Optional[int] = None
 
 
 # Salary Update Schema

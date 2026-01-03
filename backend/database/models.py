@@ -101,7 +101,6 @@ class Resume(Base):
     about = Column(BigInteger)
     skills = Column(Text)
     certification = Column(Text)
-    column_0 = Column(BigInteger)
     
     # Relationships
     employee = relationship("Employee", back_populates="resume_data")
