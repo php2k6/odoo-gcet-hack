@@ -58,6 +58,7 @@ class ResumeResponse(BaseModel):
     about: Optional[int] = None
     skills: Optional[str] = None
     certification: Optional[str] = None
+    column_0: Optional[int] = None
     
     class Config:
         from_attributes = True
@@ -91,6 +92,7 @@ class EmployeeResponse(BaseModel):
     manager: Optional[str] = None
     location: Optional[str] = None
     job_position: Optional[str] = None
+    resume: Optional[str] = None
     prof_pic: Optional[bytes] = None
     current_status: Optional[int] = None
     role: str = "employee"

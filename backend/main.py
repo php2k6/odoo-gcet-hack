@@ -2,8 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from database.database import engine, Base
 from database import models
-from routers import employee, auth, leave
-
+from routers import employee, auth, leave,attendance
 # Create database tables
 Base.metadata.create_all(bind=engine)
 
@@ -25,7 +24,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(employee.router)
 app.include_router(leave.router)
-
+app.include_router(attendance.router)
 
 @app.get("/")
 async def root():

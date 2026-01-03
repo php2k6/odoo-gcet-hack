@@ -151,7 +151,6 @@ async def get_employee_profile(
         manager=current_employee.manager,
         location=current_employee.location,
         job_position=current_employee.job_position,
-        resume=current_employee.resume,
         prof_pic=current_employee.prof_pic,
         current_status=current_employee.current_status,
         role="employee",

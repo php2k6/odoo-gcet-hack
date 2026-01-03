@@ -8,7 +8,7 @@ from database.models import Employee, Attendance, Summary
 from schemas.attendance import (
     AttendanceRecord, CompanyAttendanceResponse, 
     EmployeeAttendanceResponse, SummaryResponse,
-    CheckInResponse, CheckOutResponse
+    CheckInResponse, CheckOutResponse, EmployeeStatusResponse
 )
 from auth.auth import get_current_company, get_current_employee, decode_token
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -309,6 +309,34 @@ async def check_out(
         check_out_time=now,
         work_hours=work_hours_float,
         extra_hours=extra_hours_float,
-        current_status=current_employee.current_statusa_hours_float,
-        current_status=0
+        current_status=current_employee.current_status
+    )
+
+
+@router.get("/status", response_model=EmployeeStatusResponse)
+async def get_employee_status(
+    current_employee = Depends(get_current_employee),
+    db: Session = Depends(get_db)
+):
+    """
+    Get current status of the employee
+    Status values:
+    - 0: Checked out / No attendance record
+    - 1: Checked in (working)
+    - 2: On leave
+    """
+    # Update status based on today's attendance
+    update_employee_status(current_employee, db)
+    
+    # Map status to description
+    status_map = {
+        0: "Checked out",
+        1: "Checked in (Working)",
+        2: "On leave"
+    }
+    
+    return EmployeeStatusResponse(
+        emp_id=current_employee.id,
+        current_status=current_employee.current_status,
+        status_description=status_map.get(current_employee.current_status, "Unknown")
     )

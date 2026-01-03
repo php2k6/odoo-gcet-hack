@@ -67,3 +67,10 @@ class CheckOutResponse(BaseModel):
     work_hours: float  # in hours
     extra_hours: float  # in hours
     current_status: int
+
+
+# Employee Status Response
+class EmployeeStatusResponse(BaseModel):
+    emp_id: str
+    current_status: int
+    status_description: str
