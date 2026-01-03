@@ -32,7 +32,6 @@ class Employee(Base):
     manager = Column(Text)
     location = Column(Text)
     job_position = Column(Text)
-    resume = Column(Text)
     prof_pic = Column(LargeBinary)
     current_status = Column(Integer)
     
