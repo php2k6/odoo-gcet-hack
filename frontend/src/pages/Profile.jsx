@@ -1056,11 +1056,30 @@ export default function Profile() {
                         )}
 
                         {activeTab === 'salary-info' && (
-                            <SalaryInfo isAdmin={isAdmin} salaryData={salaryData} />
+                            <SalaryInfo 
+                                isAdmin={isAdmin && isViewingEmployee}
+                                salaryData={salaryData}
+                                isEditing={isEditingSalary}
+                                onEdit={() => setIsEditingSalary(true)}
+                                onSave={handleSaveSalary}
+                                onCancel={handleCancelSalary}
+                                editableData={editableSalaryData}
+                                onFieldChange={handleSalaryFieldChange}
+                                isLoading={apiLoading}
+                            />
                         )}
                     </div>
                 </div>
             </div>
+            
+            {/* Toast Notification */}
+            {toast.show && (
+                <MyToast 
+                    message={toast.message} 
+                    type={toast.type} 
+                    onClose={() => setToast({ show: false, message: '', type: 'success' })}
+                />
+            )}
         </div>
     );
 }
