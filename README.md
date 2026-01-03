@@ -35,6 +35,17 @@ A comprehensive full-stack HRMS (Human Resource Management System) built for man
 - **HTTP Client**: Axios 1.13.2
 - **Icons**: Lucide React, React Icons
 - **OAuth**: Google OAuth integration
+##  Screnshots
+### Admin
+<img width="1911" height="971" alt="image" src="https://github.com/user-attachments/assets/096c2534-a24b-4c9a-ab4a-d6b2a3f6f3c2" />
+<img width="1896" height="974" alt="image" src="https://github.com/user-attachments/assets/6981d39b-414d-4e21-bb16-8110b9212f66" />
+<img width="1878" height="976" alt="image" src="https://github.com/user-attachments/assets/b488cc00-ff84-4b0d-a135-a5583f184bf2" />
+<img width="1888" height="973" alt="image" src="https://github.com/user-attachments/assets/5d14ef1b-ffcd-4707-8a27-8dd5e2f72c7e" />
+### Employee
+<img width="1884" height="978" alt="image" src="https://github.com/user-attachments/assets/4e6469ce-d274-4e8a-9d39-892537ae5b09" />
+<img width="1881" height="983" alt="image" src="https://github.com/user-attachments/assets/2e5dd895-38cb-4b7c-a080-aa7864ca4093" />
+<img width="1113" height="434" alt="image" src="https://github.com/user-attachments/assets/b7c3748b-d1b4-48ed-ac09-2630e728dfb6" />
+<img width="1884" height="967" alt="image" src="https://github.com/user-attachments/assets/7cee8e54-8904-459b-8a43-334c3e0629e9" />
 
 ## 📁 Project Structure
 
