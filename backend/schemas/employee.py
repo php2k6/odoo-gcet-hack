@@ -163,7 +163,7 @@ class EmployeeCreate(BaseModel):
     location: str
     job_position: str
     prof_pic: Optional[bytes] = None
-    current_status: int = 1
+    current_status: int = 0
     
     # Related data
     private_info: PrivateInfoCreate
