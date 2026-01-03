@@ -13,6 +13,7 @@ import Dashboard from './pages/Dashboard.jsx'
 import Profile from './pages/Profile.jsx'
 import EmployeeAttendance from './pages/EmployeeAttendance.jsx'
 import AdminLeaveManagement from './pages/AdminLeaveManagement.jsx'
+import EmployeeLeave from './pages/EmployeeLeave.jsx'
 import AttendancePage from './pages/AttendancePage.jsx'
 import EmployeeRegistration from './pages/EmployeeRegistration.jsx'
 import NotFound from './pages/NotFound.jsx'
@@ -74,6 +75,15 @@ const router = createBrowserRouter([
             path: 'attendance',
             element: <EmployeeAttendance />,
           },
+          {
+            path: 'leave',
+            element: <EmployeeLeave />,
+          },
+        ],
+      },
+      {
+        path: 'admin',
+        children: [
           {
             path: 'leave',
             element: <AdminLeaveManagement />,

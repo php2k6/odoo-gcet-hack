@@ -1,96 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Shield, CheckCircle, XCircle, AlertCircle, Search, Filter, Calendar, User } from 'lucide-react';
 import EmployeeNav from '../components/EmployeeNav';
+import api from '../utils/api';
+import MyToast from '../components/MyToast';
 
 export default function AdminLeaveManagement() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  // Sample data - in real app, this would come from backend API
-  const [leaves, setLeaves] = useState([
-    { 
-      id: 1, 
-      employee: 'John Smith', 
-      employeeId: 'EMP001',
-      department: 'Engineering',
-      type: 'Paid', 
-      startDate: '2026-01-15', 
-      endDate: '2026-01-17', 
-      days: 3,
-      remarks: 'Family vacation', 
-      status: 'Pending',
-      appliedDate: '2026-01-05',
-      adminComment: '' 
-    },
-    { 
-      id: 2, 
-      employee: 'Sarah Johnson', 
-      employeeId: 'EMP002',
-      department: 'Marketing',
-      type: 'Sick', 
-      startDate: '2026-01-20', 
-      endDate: '2026-01-22', 
-      days: 3,
-      remarks: 'Medical checkup', 
-      status: 'Pending',
-      appliedDate: '2026-01-03',
-      adminComment: '' 
-    },
-    { 
-      id: 3, 
-      employee: 'Mike Chen', 
-      employeeId: 'EMP003',
-      department: 'Sales',
-      type: 'Unpaid', 
-      startDate: '2026-02-10', 
-      endDate: '2026-02-12', 
-      days: 3,
-      remarks: 'Personal matters', 
-      status: 'Pending',
-      appliedDate: '2026-01-02',
-      adminComment: '' 
-    },
-    { 
-      id: 4, 
-      employee: 'Emily Davis', 
-      employeeId: 'EMP004',
-      department: 'HR',
-      type: 'Sick', 
-      startDate: '2025-12-20', 
-      endDate: '2025-12-21', 
-      days: 2,
-      remarks: 'Flu symptoms', 
-      status: 'Approved',
-      appliedDate: '2025-12-15',
-      adminComment: 'Get well soon!' 
-    },
-    { 
-      id: 5, 
-      employee: 'David Wilson', 
-      employeeId: 'EMP005',
-      department: 'Finance',
-      type: 'Paid', 
-      startDate: '2025-12-25', 
-      endDate: '2025-12-30', 
-      days: 6,
-      remarks: 'Year-end holidays', 
-      status: 'Approved',
-      appliedDate: '2025-12-01',
-      adminComment: 'Approved for year-end break' 
-    },
-    { 
-      id: 6, 
-      employee: 'Lisa Anderson', 
-      employeeId: 'EMP006',
-      department: 'Engineering',
-      type: 'Paid', 
-      startDate: '2025-11-15', 
-      endDate: '2025-11-16', 
-      days: 2,
-      remarks: 'Personal work', 
-      status: 'Rejected',
-      appliedDate: '2025-11-10',
-      adminComment: 'Critical project deadline approaching' 
-    }
-  ]);
+  const [leaves, setLeaves] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [toast, setToast] = useState({ show: false, message: '', type: '' });
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
@@ -98,24 +17,100 @@ export default function AdminLeaveManagement() {
   const [adminComments, setAdminComments] = useState({});
   const [selectedLeave, setSelectedLeave] = useState(null);
 
-  // Handle approval/rejection
-  const handleAction = (leaveId, action) => {
-    setLeaves(leaves.map(leave => {
-      if (leave.id === leaveId) {
-        return {
-          ...leave,
-          status: action,
-          adminComment: adminComments[leaveId] || ''
+  // Fetch admin leave requests
+  useEffect(() => {
+    fetchLeaves();
+  }, []);
+
+  const fetchLeaves = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await api.get('/leaves/admin');
+      const data = response.data;
+      
+      // Map API response to component format
+      const mappedLeaves = (data.leaves || []).map(leave => {
+        const calculateDays = (start, end) => {
+          if (!start || !end) return 0;
+          const startDate = new Date(start);
+          const endDate = new Date(end);
+          const diffTime = Math.abs(endDate - startDate);
+          return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
         };
+        
+        return {
+          id: leave.leave_id,
+          employee: leave.emp_id, // Will need employee name from another endpoint
+          employeeId: leave.emp_id,
+          department: '',
+          type: leave.leave_type,
+          startDate: leave.start_date,
+          endDate: leave.end_date,
+          days: calculateDays(leave.start_date, leave.end_date),
+          status: 'Pending',
+          appliedDate: leave.start_date,
+          remarks: '',
+          adminComment: ''
+        };
+      });
+      
+      setLeaves(mappedLeaves);
+    } catch (err) {
+      console.error('Error fetching leaves:', err);
+      setError(err.response?.data?.message || 'Failed to fetch leave requests');
+      setToast({
+        show: true,
+        message: err.response?.data?.message || 'Failed to fetch leave requests',
+        type: 'error'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle approval/rejection
+  const handleAction = async (leaveId, action) => {
+    setLoading(true);
+    
+    try {
+      if (action === 'Approved') {
+        // Call approve endpoint
+        await api.put(`/leaves/${leaveId}/approve`);
+        
+        setToast({
+          show: true,
+          message: 'Leave request approved successfully!',
+          type: 'success'
+        });
+      } else if (action === 'Rejected') {
+        // Call reject endpoint (deletes the record)
+        await api.delete(`/leaves/${leaveId}/reject`);
+        
+        setToast({
+          show: true,
+          message: 'Leave request rejected and removed!',
+          type: 'success'
+        });
       }
-      return leave;
-    }));
-    
-    setAdminComments({ ...adminComments, [leaveId]: '' });
-    setSelectedLeave(null);
-    
-    // In real app, send to backend API
-    // await fetch('/api/leaves/update', { method: 'POST', body: { leaveId, status: action, comment } });
+      
+      // Clear comment and close panel
+      setAdminComments({ ...adminComments, [leaveId]: '' });
+      setSelectedLeave(null);
+      
+      // Refresh leave list to get updated data
+      fetchLeaves();
+    } catch (err) {
+      console.error('Error updating leave:', err);
+      setToast({
+        show: true,
+        message: err.response?.data?.message || 'Failed to update leave request',
+        type: 'error'
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Filter leaves
@@ -162,6 +157,14 @@ export default function AdminLeaveManagement() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50">
+      {toast.show && (
+        <MyToast 
+          show={toast.show}
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast({ show: false, message: '', type: '' })}
+        />
+      )}
       <EmployeeNav showProfileMenu={showProfileMenu} setShowProfileMenu={setShowProfileMenu} />
       <div className="max-w-7xl mx-auto p-6">
         {/* Header */}
@@ -274,7 +277,12 @@ export default function AdminLeaveManagement() {
             </h2>
           </div>
 
-          {filteredLeaves.length === 0 ? (
+          {loading && !leaves.length ? (
+            <div className="text-center py-16">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mb-4"></div>
+              <p className="text-gray-600">Loading leave requests...</p>
+            </div>
+          ) : filteredLeaves.length === 0 ? (
             <div className="text-center py-16 text-gray-500">
               <AlertCircle className="w-16 h-16 mx-auto mb-4 opacity-30" />
               <p className="text-lg">No leave requests found</p>
@@ -361,47 +369,29 @@ export default function AdminLeaveManagement() {
                       </span>
 
                       {leave.status === 'Pending' && (
-                        <button
-                          onClick={() => setSelectedLeave(leave.id === selectedLeave ? null : leave.id)}
-                          className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-md hover:shadow-lg transition-all transform hover:scale-105"
-                        >
-                          {selectedLeave === leave.id ? 'Close' : 'Take Action'}
-                        </button>
+                        <div className="flex flex-col gap-2">
+                          <button
+                            onClick={() => handleAction(leave.id, 'Approved')}
+                            disabled={loading}
+                            className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-2 rounded-lg font-semibold text-sm shadow-md hover:shadow-lg transition-all flex items-center gap-2 disabled:opacity-50"
+                          >
+                            <CheckCircle className="w-4 h-4" />
+                            Approve
+                          </button>
+                          <button
+                            onClick={() => handleAction(leave.id, 'Rejected')}
+                            disabled={loading}
+                            className="bg-gradient-to-r from-red-600 to-rose-600 text-white px-4 py-2 rounded-lg font-semibold text-sm shadow-md hover:shadow-lg transition-all flex items-center gap-2 disabled:opacity-50"
+                          >
+                            <XCircle className="w-4 h-4" />
+                            Reject
+                          </button>
+                        </div>
                       )}
                     </div>
                   </div>
 
-                  {/* Action Panel (shown when selected) */}
-                  {selectedLeave === leave.id && leave.status === 'Pending' && (
-                    <div className="mt-4 pt-4 border-t border-gray-200">
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Add Comment (Optional)
-                      </label>
-                      <textarea
-                        value={adminComments[leave.id] || ''}
-                        onChange={(e) => setAdminComments({ ...adminComments, [leave.id]: e.target.value })}
-                        rows="3"
-                        placeholder="Add your comment or reason for approval/rejection..."
-                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition resize-none mb-4"
-                      />
-                      <div className="flex gap-3">
-                        <button
-                          onClick={() => handleAction(leave.id, 'Approved')}
-                          className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 px-6 rounded-lg font-semibold shadow-md hover:shadow-lg hover:from-green-700 hover:to-emerald-700 transition-all transform hover:scale-105 flex items-center justify-center gap-2"
-                        >
-                          <CheckCircle className="w-5 h-5" />
-                          Approve Leave
-                        </button>
-                        <button
-                          onClick={() => handleAction(leave.id, 'Rejected')}
-                          className="flex-1 bg-gradient-to-r from-red-600 to-rose-600 text-white py-3 px-6 rounded-lg font-semibold shadow-md hover:shadow-lg hover:from-red-700 hover:to-rose-700 transition-all transform hover:scale-105 flex items-center justify-center gap-2"
-                        >
-                          <XCircle className="w-5 h-5" />
-                          Reject Leave
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                  {/* Action Panel (shown when selected) - Removed */}
                 </div>
               ))}
             </div>

@@ -1,10 +1,12 @@
 import { useState, useMemo, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import EmployeeNav from "../components/EmployeeNav";
 import { useAuth } from "../context/AuthContext";
 import api from "../utils/api";
 
 export default function AttendancePage() {
     const { isAdmin } = useAuth();
+    const navigate = useNavigate();
 
     const [menu, setMenu] = useState(false);
     const [selDate, setSelDate] = useState(new Date());
@@ -322,7 +324,17 @@ export default function AttendancePage() {
                         <tbody>
                             {dispData.length ? (
                                 dispData.map((a, i) => (
-                                    <tr key={i} className="border-t hover:bg-slate-50">
+                                    <tr 
+                                        key={i} 
+                                        className="border-t hover:bg-slate-50 cursor-pointer"
+                                        onClick={() => isAdmin && a.empId && navigate(`/profile?id=${a.empId}`, {
+                                            state: { 
+                                                employeeName: a.name, 
+                                                employeeDepartment: a.department,
+                                                employeeId: a.empId
+                                            }
+                                        })}
+                                    >
                                         {isAdmin ? (
                                             <td className="px-4 py-3 font-medium">{a.name}</td>
                                         ) : (

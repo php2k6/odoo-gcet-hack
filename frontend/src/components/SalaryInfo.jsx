@@ -105,7 +105,7 @@ export default function SalaryInfo({
                             </div>
                         </div>
                         <div className="flex items-center justify-between bg-gray-50 rounded-lg p-4 mt-3">
-                            <div className="flex items-center space-x-4">
+                            <div className="flex items-center space-x-6">
                                 <div>
                                     <p className="text-xs text-gray-500 mb-1">Amount</p>
                                     {isEditing ? (
@@ -120,6 +120,22 @@ export default function SalaryInfo({
                                     )}
                                     <p className="text-xs text-gray-500 mt-1">₹ / month</p>
                                 </div>
+                                {isEditing && (
+                                    <div>
+                                        <p className="text-xs text-gray-500 mb-1">Percentage</p>
+                                        <div className="flex items-center">
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                value={(editableData.basic_sal_percent || 0).toFixed(2)}
+                                                onChange={(e) => onFieldChange('basic_sal_percent', e.target.value)}
+                                                className="w-24 px-2 py-1 text-xl font-bold text-blue-600 border border-blue-300 rounded"
+                                            />
+                                            <Percent className="w-5 h-5 text-blue-600 ml-1" />
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-1">of monthly wage</p>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -133,7 +149,7 @@ export default function SalaryInfo({
                             </div>
                         </div>
                         <div className="flex items-center justify-between bg-gray-50 rounded-lg p-4 mt-3">
-                            <div className="flex items-center space-x-4">
+                            <div className="flex items-center space-x-6">
                                 <div>
                                     <p className="text-xs text-gray-500 mb-1">Amount</p>
                                     {isEditing ? (
@@ -148,6 +164,22 @@ export default function SalaryInfo({
                                     )}
                                     <p className="text-xs text-gray-500 mt-1">₹ / month</p>
                                 </div>
+                                {isEditing && (
+                                    <div>
+                                        <p className="text-xs text-gray-500 mb-1">Percentage</p>
+                                        <div className="flex items-center">
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                value={(editableData.hra_percent || 0).toFixed(2)}
+                                                onChange={(e) => onFieldChange('hra_percent', e.target.value)}
+                                                className="w-24 px-2 py-1 text-xl font-bold text-blue-600 border border-blue-300 rounded"
+                                            />
+                                            <Percent className="w-5 h-5 text-blue-600 ml-1" />
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-1">of monthly wage</p>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -161,7 +193,7 @@ export default function SalaryInfo({
                             </div>
                         </div>
                         <div className="flex items-center justify-between bg-gray-50 rounded-lg p-4 mt-3">
-                            <div className="flex items-center space-x-4">
+                            <div className="flex items-center space-x-6">
                                 <div>
                                     <p className="text-xs text-gray-500 mb-1">Amount</p>
                                     {isEditing ? (
@@ -176,6 +208,22 @@ export default function SalaryInfo({
                                     )}
                                     <p className="text-xs text-gray-500 mt-1">₹ / month</p>
                                 </div>
+                                {isEditing && (
+                                    <div>
+                                        <p className="text-xs text-gray-500 mb-1">Percentage</p>
+                                        <div className="flex items-center">
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                value={(editableData.sa_percent || 0).toFixed(2)}
+                                                onChange={(e) => onFieldChange('sa_percent', e.target.value)}
+                                                className="w-24 px-2 py-1 text-xl font-bold text-blue-600 border border-blue-300 rounded"
+                                            />
+                                            <Percent className="w-5 h-5 text-blue-600 ml-1" />
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-1">of monthly wage</p>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -189,7 +237,7 @@ export default function SalaryInfo({
                             </div>
                         </div>
                         <div className="flex items-center justify-between bg-gray-50 rounded-lg p-4 mt-3">
-                            <div className="flex items-center space-x-4">
+                            <div className="flex items-center space-x-6">
                                 <div>
                                     <p className="text-xs text-gray-500 mb-1">Amount</p>
                                     {isEditing ? (
@@ -204,6 +252,22 @@ export default function SalaryInfo({
                                     )}
                                     <p className="text-xs text-gray-500 mt-1">₹ / month</p>
                                 </div>
+                                {isEditing && (
+                                    <div>
+                                        <p className="text-xs text-gray-500 mb-1">Percentage</p>
+                                        <div className="flex items-center">
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                value={(editableData.perf_bonus_percent || 0).toFixed(2)}
+                                                onChange={(e) => onFieldChange('perf_bonus_percent', e.target.value)}
+                                                className="w-24 px-2 py-1 text-xl font-bold text-blue-600 border border-blue-300 rounded"
+                                            />
+                                            <Percent className="w-5 h-5 text-blue-600 ml-1" />
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-1">of monthly wage</p>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -217,7 +281,7 @@ export default function SalaryInfo({
                             </div>
                         </div>
                         <div className="flex items-center justify-between bg-gray-50 rounded-lg p-4 mt-3">
-                            <div className="flex items-center space-x-4">
+                            <div className="flex items-center space-x-6">
                                 <div>
                                     <p className="text-xs text-gray-500 mb-1">Amount</p>
                                     {isEditing ? (
@@ -232,6 +296,22 @@ export default function SalaryInfo({
                                     )}
                                     <p className="text-xs text-gray-500 mt-1">₹ / month</p>
                                 </div>
+                                {isEditing && (
+                                    <div>
+                                        <p className="text-xs text-gray-500 mb-1">Percentage</p>
+                                        <div className="flex items-center">
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                value={(editableData.ita_percent || 0).toFixed(2)}
+                                                onChange={(e) => onFieldChange('ita_percent', e.target.value)}
+                                                className="w-24 px-2 py-1 text-xl font-bold text-blue-600 border border-blue-300 rounded"
+                                            />
+                                            <Percent className="w-5 h-5 text-blue-600 ml-1" />
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-1">of monthly wage</p>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -245,7 +325,7 @@ export default function SalaryInfo({
                             </div>
                         </div>
                         <div className="flex items-center justify-between bg-gray-50 rounded-lg p-4 mt-3">
-                            <div className="flex items-center space-x-4">
+                            <div className="flex items-center space-x-6">
                                 <div>
                                     <p className="text-xs text-gray-500 mb-1">Amount</p>
                                     {isEditing ? (
@@ -260,6 +340,22 @@ export default function SalaryInfo({
                                     )}
                                     <p className="text-xs text-gray-500 mt-1">₹ / month</p>
                                 </div>
+                                {isEditing && (
+                                    <div>
+                                        <p className="text-xs text-gray-500 mb-1">Percentage</p>
+                                        <div className="flex items-center">
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                value={(editableData.fa_percent || 0).toFixed(2)}
+                                                onChange={(e) => onFieldChange('fa_percent', e.target.value)}
+                                                className="w-24 px-2 py-1 text-xl font-bold text-blue-600 border border-blue-300 rounded"
+                                            />
+                                            <Percent className="w-5 h-5 text-blue-600 ml-1" />
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-1">of monthly wage</p>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -278,34 +374,72 @@ export default function SalaryInfo({
                             <div className="flex items-center justify-between mb-2">
                                 <p className="text-sm font-medium text-indigo-900">Employee Contribution (PF1)</p>
                             </div>
-                            {isEditing ? (
-                                <input
-                                    type="number"
-                                    value={editableData.pf1 || 0}
-                                    onChange={(e) => onFieldChange('pf1', e.target.value)}
-                                    className="w-full px-3 py-2 text-3xl font-bold text-indigo-900 border border-indigo-300 rounded"
-                                />
-                            ) : (
-                                <p className="text-3xl font-bold text-indigo-900">₹{(displayData.pf1 || 0).toLocaleString()}</p>
-                            )}
-                            <p className="text-sm text-indigo-600 mt-1">₹ / month</p>
+                            <div className="flex items-center space-x-4">
+                                <div className="flex-1">
+                                    {isEditing ? (
+                                        <input
+                                            type="number"
+                                            value={editableData.pf1 || 0}
+                                            onChange={(e) => onFieldChange('pf1', e.target.value)}
+                                            className="w-full px-3 py-2 text-3xl font-bold text-indigo-900 border border-indigo-300 rounded"
+                                        />
+                                    ) : (
+                                        <p className="text-3xl font-bold text-indigo-900">₹{(displayData.pf1 || 0).toLocaleString()}</p>
+                                    )}
+                                    <p className="text-sm text-indigo-600 mt-1">₹ / month</p>
+                                </div>
+                                {isEditing && (
+                                    <div>
+                                        <div className="flex items-center">
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                value={(editableData.pf1_percent || 0).toFixed(2)}
+                                                onChange={(e) => onFieldChange('pf1_percent', e.target.value)}
+                                                className="w-20 px-2 py-1 text-xl font-bold text-indigo-600 border border-indigo-300 rounded"
+                                            />
+                                            <Percent className="w-5 h-5 text-indigo-600 ml-1" />
+                                        </div>
+                                        <p className="text-xs text-indigo-600 mt-1">of monthly</p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         <div className="bg-green-50 rounded-lg p-5 border border-green-200">
                             <div className="flex items-center justify-between mb-2">
                                 <p className="text-sm font-medium text-green-900">Employer Contribution (PF2)</p>
                             </div>
-                            {isEditing ? (
-                                <input
-                                    type="number"
-                                    value={editableData.pf2 || 0}
-                                    onChange={(e) => onFieldChange('pf2', e.target.value)}
-                                    className="w-full px-3 py-2 text-3xl font-bold text-green-900 border border-green-300 rounded"
-                                />
-                            ) : (
-                                <p className="text-3xl font-bold text-green-900">₹{(displayData.pf2 || 0).toLocaleString()}</p>
-                            )}
-                            <p className="text-sm text-green-600 mt-1">₹ / month</p>
+                            <div className="flex items-center space-x-4">
+                                <div className="flex-1">
+                                    {isEditing ? (
+                                        <input
+                                            type="number"
+                                            value={editableData.pf2 || 0}
+                                            onChange={(e) => onFieldChange('pf2', e.target.value)}
+                                            className="w-full px-3 py-2 text-3xl font-bold text-green-900 border border-green-300 rounded"
+                                        />
+                                    ) : (
+                                        <p className="text-3xl font-bold text-green-900">₹{(displayData.pf2 || 0).toLocaleString()}</p>
+                                    )}
+                                    <p className="text-sm text-green-600 mt-1">₹ / month</p>
+                                </div>
+                                {isEditing && (
+                                    <div>
+                                        <div className="flex items-center">
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                value={(editableData.pf2_percent || 0).toFixed(2)}
+                                                onChange={(e) => onFieldChange('pf2_percent', e.target.value)}
+                                                className="w-20 px-2 py-1 text-xl font-bold text-green-600 border border-green-300 rounded"
+                                            />
+                                            <Percent className="w-5 h-5 text-green-600 ml-1" />
+                                        </div>
+                                        <p className="text-xs text-green-600 mt-1">of monthly</p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -320,17 +454,36 @@ export default function SalaryInfo({
                             <div className="flex items-center justify-between mb-2">
                                 <p className="text-sm font-medium text-red-900">Professional Tax</p>
                             </div>
-                            {isEditing ? (
-                                <input
-                                    type="number"
-                                    value={editableData.prof_tax || 0}
-                                    onChange={(e) => onFieldChange('prof_tax', e.target.value)}
-                                    className="w-full px-3 py-2 text-3xl font-bold text-red-900 border border-red-300 rounded"
-                                />
-                            ) : (
-                                <p className="text-3xl font-bold text-red-900">₹{(displayData.prof_tax || 0).toLocaleString()}</p>
-                            )}
-                            <p className="text-sm text-red-600 mt-1">₹ / month</p>
+                            <div className="flex items-center space-x-4">
+                                <div className="flex-1">
+                                    {isEditing ? (
+                                        <input
+                                            type="number"
+                                            value={editableData.prof_tax || 0}
+                                            onChange={(e) => onFieldChange('prof_tax', e.target.value)}
+                                            className="w-full px-3 py-2 text-3xl font-bold text-red-900 border border-red-300 rounded"
+                                        />
+                                    ) : (
+                                        <p className="text-3xl font-bold text-red-900">₹{(displayData.prof_tax || 0).toLocaleString()}</p>
+                                    )}
+                                    <p className="text-sm text-red-600 mt-1">₹ / month</p>
+                                </div>
+                                {isEditing && (
+                                    <div>
+                                        <div className="flex items-center">
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                value={(editableData.prof_tax_percent || 0).toFixed(2)}
+                                                onChange={(e) => onFieldChange('prof_tax_percent', e.target.value)}
+                                                className="w-20 px-2 py-1 text-xl font-bold text-red-600 border border-red-300 rounded"
+                                            />
+                                            <Percent className="w-5 h-5 text-red-600 ml-1" />
+                                        </div>
+                                        <p className="text-xs text-red-600 mt-1">of monthly</p>
+                                    </div>
+                                )}
+                            </div>
                             <p className="text-xs text-gray-600 mt-3">Professional Tax deducted from the Gross salary</p>
                         </div>
 
