@@ -59,10 +59,10 @@ async def get_employees(
     current_company: Company = Depends(get_current_company)
 ):
     """
-    Get all employees with all details except password
+    Get all employees belonging to the current company
     Admin only
     """
-    employees = db.query(Employee).all()
+    employees = db.query(Employee).filter(Employee.company_id == current_company.id).all()
     
     return {"employees": employees, "count": len(employees)}
 
