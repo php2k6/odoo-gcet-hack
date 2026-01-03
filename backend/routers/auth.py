@@ -108,7 +108,7 @@ async def employee_login(
     db: Session = Depends(get_db)
 ):
     """Employee login endpoint"""
-    employee = db.query(Employee).filter(Employee.email == login_data.email).first()
+    employee = db.query(Employee).filter(Employee.id == login_data.id).first()
     
     if not employee or not verify_password(login_data.password, employee.password):
         raise HTTPException(

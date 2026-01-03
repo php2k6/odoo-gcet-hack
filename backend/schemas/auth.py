@@ -31,7 +31,7 @@ class CompanyResponse(BaseModel):
 
 # Employee Schemas
 class EmployeeLogin(BaseModel):
-    email: EmailStr
+    id: str
     password: str
 
 
