@@ -1,0 +1,225 @@
+import { useState } from 'react';
+import { Calendar, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+
+export default function LeaveManagement() {
+  const [leaves, setLeaves] = useState([
+    { id: 1, type: 'Paid', startDate: '2026-01-15', endDate: '2026-01-17', remarks: 'Family vacation', status: 'Approved' },
+    { id: 2, type: 'Sick', startDate: '2025-12-20', endDate: '2025-12-21', remarks: 'Medical checkup', status: 'Approved' },
+    { id: 3, type: 'Unpaid', startDate: '2026-02-10', endDate: '2026-02-12', remarks: 'Personal matters', status: 'Pending' }
+  ]);
+
+  const [formData, setFormData] = useState({
+    type: 'Paid',
+    startDate: '',
+    endDate: '',
+    remarks: ''
+  });
+
+  const [activeTab, setActiveTab] = useState('apply');
+
+  const handleSubmit = () => {
+    if (!formData.startDate || !formData.endDate) {
+      alert('Please select both start and end dates');
+      return;
+    }
+
+    const newLeave = {
+      id: leaves.length + 1,
+      type: formData.type,
+      startDate: formData.startDate,
+      endDate: formData.endDate,
+      remarks: formData.remarks,
+      status: 'Pending'
+    };
+
+    setLeaves([newLeave, ...leaves]);
+    setFormData({ type: 'Paid', startDate: '', endDate: '', remarks: '' });
+    setActiveTab('history');
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'Approved':
+        return <CheckCircle className="w-5 h-5 text-green-500" />;
+      case 'Rejected':
+        return <XCircle className="w-5 h-5 text-red-500" />;
+      default:
+        return <AlertCircle className="w-5 h-5 text-yellow-500" />;
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Approved':
+        return 'bg-green-100 text-green-800';
+      case 'Rejected':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-yellow-100 text-yellow-800';
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+      <div className="max-w-6xl mx-auto p-6">
+        {/* Header */}
+        <div className="text-center mb-8 mt-8">
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">Leave & Time-Off Management</h1>
+          <p className="text-gray-600">Manage your leave requests efficiently</p>
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="flex gap-4 mb-6">
+          <button
+            onClick={() => setActiveTab('apply')}
+            className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-all ${
+              activeTab === 'apply'
+                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg'
+                : 'bg-white text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            Apply for Leave
+          </button>
+          <button
+            onClick={() => setActiveTab('history')}
+            className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-all ${
+              activeTab === 'history'
+                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg'
+                : 'bg-white text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            Leave History
+          </button>
+        </div>
+
+        {/* Apply Leave Form */}
+        {activeTab === 'apply' && (
+          <div className="bg-white rounded-2xl shadow-xl p-8">
+            <div className="flex items-center gap-3 mb-6">
+              <Calendar className="w-8 h-8 text-indigo-600" />
+              <h2 className="text-2xl font-bold text-gray-800">Submit Leave Request</h2>
+            </div>
+
+            <div className="space-y-6">
+              {/* Leave Type */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Leave Type
+                </label>
+                <select
+                  value={formData.type}
+                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
+                >
+                  <option value="Paid">Paid Leave</option>
+                  <option value="Sick">Sick Leave</option>
+                  <option value="Unpaid">Unpaid Leave</option>
+                </select>
+              </div>
+
+              {/* Date Range */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Start Date
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.startDate}
+                    onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    End Date
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.endDate}
+                    onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
+                  />
+                </div>
+              </div>
+
+              {/* Remarks */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Remarks (Optional)
+                </label>
+                <textarea
+                  value={formData.remarks}
+                  onChange={(e) => setFormData({ ...formData, remarks: e.target.value })}
+                  rows="4"
+                  placeholder="Add any additional information..."
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition resize-none"
+                />
+              </div>
+
+              {/* Submit Button */}
+              <button
+                onClick={handleSubmit}
+                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 px-6 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-indigo-700 transition-all transform hover:scale-105"
+              >
+                Submit Leave Request
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Leave History */}
+        {activeTab === 'history' && (
+          <div className="bg-white rounded-2xl shadow-xl p-8">
+            <div className="flex items-center gap-3 mb-6">
+              <Clock className="w-8 h-8 text-indigo-600" />
+              <h2 className="text-2xl font-bold text-gray-800">Leave History</h2>
+            </div>
+
+            {leaves.length === 0 ? (
+              <div className="text-center py-12 text-gray-500">
+                <p className="text-lg">No leave requests found</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {leaves.map((leave) => (
+                  <div
+                    key={leave.id}
+                    className="border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-3">
+                          <span className="px-4 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm font-semibold">
+                            {leave.type}
+                          </span>
+                          <span className={`px-4 py-1 rounded-full text-sm font-semibold flex items-center gap-2 ${getStatusColor(leave.status)}`}>
+                            {getStatusIcon(leave.status)}
+                            {leave.status}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-600 mb-2">
+                          <div>
+                            <span className="font-semibold">Start:</span> {new Date(leave.startDate).toLocaleDateString()}
+                          </div>
+                          <div>
+                            <span className="font-semibold">End:</span> {new Date(leave.endDate).toLocaleDateString()}
+                          </div>
+                        </div>
+                        {leave.remarks && (
+                          <p className="text-sm text-gray-600 mt-2">
+                            <span className="font-semibold">Remarks:</span> {leave.remarks}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
