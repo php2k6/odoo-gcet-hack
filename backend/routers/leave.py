@@ -32,10 +32,13 @@ async def request_leave(
         )
     
     # Create leave request
+    # If end_date is not provided, default to start_date
+    end_date = leave_data.end_date if leave_data.end_date else leave_data.start_date
+    
     new_leave = LeaveTable(
         emp_id=emp_id,
         start_date=leave_data.start_date,
-        end_date=leave_data.end_date,
+        end_date=end_date,
         leave_type=leave_data.leave_type,
         is_approved=False  # Default to False
     )

@@ -5,7 +5,7 @@ from datetime import date
 
 class LeaveRequest(BaseModel):
     start_date: date
-    end_date: int
+    end_date: Optional[date] = None
     leave_type: str
 
 
@@ -13,7 +13,7 @@ class LeaveResponse(BaseModel):
     leave_id: int
     emp_id: str
     start_date: date
-    end_date: int
+    end_date: date
     leave_type: str
     is_approved: bool
     
