@@ -4,9 +4,12 @@ from sqlalchemy import func
 from database.database import get_db
 from database.models import Employee, Company, PrivateInfo, Salary, Resume, Summary, Attendance, LeaveTable
 from schemas.employee import (
-    EmployeesListResponse, EmployeeCreate, EmployeeCreateResponse, EmployeeDetailResponse
+    EmployeesListResponse, EmployeeCreate, EmployeeCreateResponse, 
+    EmployeeDetailResponse, EmployeeUpdate, ResumeUpdate, ResumeResponse,
+    SalaryUpdate, SalaryResponse, EmployeeResponse, PasswordUpdate
 )
-from auth.auth import get_current_company
+from auth.auth import get_current_company, get_password_hash
+from auth.user_dependencies import get_current_user
 from datetime import datetime
 
 router = APIRouter(prefix="/employees", tags=["Employees"])
@@ -193,3 +196,250 @@ async def get_employee_details(
         "leave_records": leave_records,
         "summary": summary
     }
+
+
+@router.put("/{emp_id}", response_model=EmployeeResponse)
+async def update_employee(
+    emp_id: str,
+    employee_data: EmployeeUpdate,
+    db: Session = Depends(get_db),
+    current_company: Company = Depends(get_current_company)
+):
+    """
+    Update employee basic information only
+    Admin only
+    """
+    # Fetch employee
+    employee = db.query(Employee).filter(Employee.id == emp_id).first()
+    
+    if not employee:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Employee not found"
+        )
+    
+    # Verify employee belongs to the current company
+    if employee.company_id != current_company.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied: Employee belongs to different company"
+        )
+    
+    # Get update data
+    update_data = employee_data.model_dump(exclude_unset=True)
+    
+    # Check email uniqueness if email is being updated
+    if "email" in update_data and update_data["email"] != employee.email:
+        existing = db.query(Employee).filter(Employee.email == update_data["email"]).first()
+        if existing:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email already registered"
+            )
+    
+    # Update employee fields
+    for key, value in update_data.items():
+        setattr(employee, key, value)
+    
+    db.commit()
+    db.refresh(employee)
+    
+    return employee
+
+
+@router.put("/{emp_id}/resume", response_model=ResumeResponse)
+async def update_employee_resume(
+    emp_id: str,
+    resume_data: ResumeUpdate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Update employee resume details
+    Accessible by: Admin (company) or the employee themselves
+    """
+    # Fetch employee
+    employee = db.query(Employee).filter(Employee.id == emp_id).first()
+    
+    if not employee:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Employee not found"
+        )
+    
+    # Authorization check: user must be either admin or the employee themselves
+    if current_user["user_type"] == "company":
+        # Admin can update any employee in their company
+        if str(employee.company_id) != current_user["user_id"]:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied: Employee belongs to different company"
+            )
+    elif current_user["user_type"] == "employee":
+        # Employee can only update their own resume
+        if employee.id != current_user["user_id"]:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied: You can only update your own resume"
+            )
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied"
+        )
+    
+    # Get update data
+    update_data = resume_data.model_dump(exclude_unset=True)
+    
+    # Fetch or create resume
+    resume = db.query(Resume).filter(Resume.emp_id == emp_id).first()
+    
+    if resume:
+        # Update existing resume
+        for key, value in update_data.items():
+            setattr(resume, key, value)
+    else:
+        # Create new resume
+        resume = Resume(
+            emp_id=emp_id,
+            **update_data
+        )
+        db.add(resume)
+    
+    db.commit()
+    db.refresh(resume)
+    
+    return resume
+
+
+@router.put("/{emp_id}/salary", response_model=SalaryResponse)
+async def update_employee_salary(
+    emp_id: str,
+    salary_data: SalaryUpdate,
+    db: Session = Depends(get_db),
+    current_company: Company = Depends(get_current_company)
+):
+    """
+    Update employee salary details
+    Admin only
+    """
+    # Fetch employee
+    employee = db.query(Employee).filter(Employee.id == emp_id).first()
+    
+    if not employee:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Employee not found"
+        )
+    
+    # Verify employee belongs to the current company
+    if employee.company_id != current_company.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied: Employee belongs to different company"
+        )
+    
+    # Get update data
+    update_data = salary_data.model_dump(exclude_unset=True)
+    
+    # Fetch or create salary
+    salary = db.query(Salary).filter(Salary.emp_id == emp_id).first()
+    
+    if salary:
+        # Update existing salary
+        for key, value in update_data.items():
+            setattr(salary, key, value)
+    else:
+        # Create new salary
+        salary = Salary(
+            emp_id=emp_id,
+            **update_data
+        )
+        db.add(salary)
+    
+    db.commit()
+    db.refresh(salary)
+    
+    return salary
+
+
+@router.delete("/{emp_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_employee(
+    emp_id: str,
+    db: Session = Depends(get_db),
+    current_company: Company = Depends(get_current_company)
+):
+    """
+    Delete employee and all related data
+    Admin only
+    """
+    # Fetch employee
+    employee = db.query(Employee).filter(Employee.id == emp_id).first()
+    
+    if not employee:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Employee not found"
+        )
+    
+    # Verify employee belongs to the current company
+    if employee.company_id != current_company.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied: Employee belongs to different company"
+        )
+    
+    # Delete employee (cascade will delete all related records)
+    db.delete(employee)
+    db.commit()
+    
+    return None
+
+
+@router.put("/{emp_id}/password")
+async def update_employee_password(
+    emp_id: str,
+    password_data: PasswordUpdate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Update employee password
+    Accessible by: Admin (company) or the employee themselves
+    """
+    # Fetch employee
+    employee = db.query(Employee).filter(Employee.id == emp_id).first()
+    
+    if not employee:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Employee not found"
+        )
+    
+    # Authorization check: user must be either admin or the employee themselves
+    if current_user["user_type"] == "company":
+        # Admin can update any employee in their company
+        if str(employee.company_id) != current_user["user_id"]:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied: Employee belongs to different company"
+            )
+    elif current_user["user_type"] == "employee":
+        # Employee can only update their own password
+        if employee.id != current_user["user_id"]:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied: You can only update your own password"
+            )
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied"
+        )
+    
+    # Hash and update password
+    employee.password = get_password_hash(password_data.new_password)
+    
+    db.commit()
+    
+    return {"message": "Password updated successfully"}

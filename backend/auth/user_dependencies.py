@@ -4,7 +4,7 @@ from fastapi.security.http import HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from database.database import get_db
 from database.models import Company, Employee
-from auth.auth import decode_access_token
+from auth.auth import decode_token
 
 security = HTTPBearer()
 
@@ -18,7 +18,7 @@ async def get_current_user(
     Returns a dict with 'user_type', 'user_id', and 'role'
     """
     token = credentials.credentials
-    payload = decode_access_token(token)
+    payload = decode_token(token)
     
     if not payload:
         raise HTTPException(

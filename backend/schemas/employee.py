@@ -182,3 +182,51 @@ class EmployeeCreateResponse(BaseModel):
     name: str
     email: EmailStr
     message: str
+
+
+# Update Employee Basic Info Only
+class EmployeeUpdate(BaseModel):
+    name: Optional[str] = None
+    phone: Optional[str] = None
+    department: Optional[str] = None
+    email: Optional[EmailStr] = None
+    manager: Optional[str] = None
+    location: Optional[str] = None
+    job_position: Optional[str] = None
+    prof_pic: Optional[bytes] = None
+    current_status: Optional[int] = None
+
+
+# Resume Update Schema
+class ResumeUpdate(BaseModel):
+    about: Optional[int] = None
+    skills: Optional[str] = None
+    certification: Optional[str] = None
+    column_0: Optional[int] = None
+
+
+# Salary Update Schema
+class SalaryUpdate(BaseModel):
+    monthly_wage: Optional[int] = None
+    yearly_wage: Optional[int] = None
+    basic_sal: Optional[int] = None
+    hra: Optional[int] = None
+    sa: Optional[int] = None
+    perf_bonus: Optional[int] = None
+    ita: Optional[int] = None
+    fa: Optional[int] = None
+    pf1: Optional[int] = None
+    pf2: Optional[int] = None
+    prof_tax: Optional[int] = None
+
+
+# Password Update Schema
+class PasswordUpdate(BaseModel):
+    new_password: str
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "new_password": "newSecurePassword123"
+            }
+        }
