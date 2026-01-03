@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { Search, Plane, XCircle, User, Calendar, FileText, LogOut, Bell } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Plane, XCircle, User, Calendar, FileText, LogOut, Bell, Edit } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import EmployeeNav from '../components/EmployeeNav.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
+import api from '../utils/api.js';
 
 // Main Dashboard Component
 export default function Dashboard() {
@@ -13,9 +14,60 @@ export default function Dashboard() {
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [currentPage, setCurrentPage] = useState('employees');
   const [showNotifications, setShowNotifications] = useState(false);
+  const [employees, setEmployees] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Fetch employees from API when component mounts (admin only)
+  useEffect(() => {
+    if (userRole === 'admin') {
+      fetchEmployees();
+    }
+  }, [userRole]);
+
+  const fetchEmployees = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await api.get('/employees');
+      const fetchedEmployees = response.data.employees.map(emp => ({
+        id: emp.id,
+        name: emp.name,
+        role: emp.job_position || 'Employee',
+        department: emp.department || 'General',
+        email: emp.email,
+        phone: emp.phone || 'N/A',
+        status: getStatusFromCode(emp.current_status),
+        joinDate: 'N/A', // Not provided in API
+        manager: emp.manager || 'N/A',
+        location: emp.location || 'N/A',
+        profPic: emp.prof_pic || null
+      }));
+      setEmployees(fetchedEmployees);
+    } catch (err) {
+      console.error('Error fetching employees:', err);
+      setError('Failed to load employees. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Map current_status code to status string
+  const getStatusFromCode = (statusCode) => {
+    switch(statusCode) {
+      case 0:
+        return 'absent';
+      case 1:
+        return 'present';
+      case 2:
+        return 'leave';
+      default:
+        return 'absent';
+    }
+  };
 
   // Sample employee data
-  const employees = [
+  const sampleEmployees = [
     { id: 1, name: 'Sarah Johnson', role: 'Senior Developer', department: 'Engineering', email: 'sarah.j@company.com', phone: '+1 234-567-8901', status: 'present', joinDate: '2022-01-15' },
     { id: 2, name: 'Michael Chen', role: 'Product Manager', department: 'Product', email: 'michael.c@company.com', phone: '+1 234-567-8902', status: 'leave', joinDate: '2021-06-20' },
     { id: 3, name: 'Emily Davis', role: 'UX Designer', department: 'Design', email: 'emily.d@company.com', phone: '+1 234-567-8903', status: 'absent', joinDate: '2023-03-10' },
@@ -100,8 +152,12 @@ export default function Dashboard() {
 
         {/* Search and View Button */}
         <div className="mb-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-          <button className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium hover:from-purple-600 hover:to-pink-600 transition duration-200 shadow-md hover:shadow-lg transform hover:scale-105">
-            VIEW ALL
+          <button 
+            onClick={fetchEmployees}
+            className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium hover:from-purple-600 hover:to-pink-600 transition duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
+            disabled={loading}
+          >
+            {loading ? 'LOADING...' : 'REFRESH'}
           </button>
           <div className="relative flex-1">
             <input
@@ -117,7 +173,12 @@ export default function Dashboard() {
 
         {/* Status Legend */}
         <div className="mb-6 p-4 bg-white rounded-lg shadow-sm border border-gray-200">
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">Status Legend:</h3>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-gray-700">Status Legend:</h3>
+            {employees.length > 0 && (
+              <span className="text-sm text-gray-600">Total: {employees.length} employees</span>
+            )}
+          </div>
           <div className="flex flex-wrap gap-4">
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 bg-green-500 rounded-full"></div>
@@ -134,44 +195,79 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Employee Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredEmployees.map((employee) => (
-            <div
-              key={employee.id}
-              onClick={() => handleCardClick(employee)}
-              className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1 border border-gray-200 overflow-hidden"
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-700">{error}</p>
+            <button 
+              onClick={fetchEmployees}
+              className="mt-2 text-red-600 hover:text-red-800 font-medium text-sm"
             >
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="w-20 h-20 bg-gradient-to-br from-purple-400 to-pink-400 rounded-lg flex items-center justify-center text-white text-2xl font-bold shadow-md">
-                    {employee.name.split(' ').map(n => n[0]).join('')}
+              Try Again
+            </button>
+          </div>
+        )}
+
+        {/* Loading State */}
+        {loading && (
+          <div className="text-center py-12 bg-white rounded-xl shadow-sm">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mb-4"></div>
+            <p className="text-gray-500 text-lg">Loading employees...</p>
+          </div>
+        )}
+
+        {/* Employee Cards Grid */}
+        {!loading && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredEmployees.map((employee) => (
+              <div
+                key={employee.id}
+                onClick={() => handleCardClick(employee)}
+                className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1 border border-gray-200 overflow-hidden"
+              >
+                <div className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    {employee.profPic ? (
+                      <img 
+                        src={employee.profPic} 
+                        alt={employee.name}
+                        className="w-20 h-20 rounded-lg object-cover shadow-md"
+                      />
+                    ) : (
+                      <div className="w-20 h-20 bg-gradient-to-br from-purple-400 to-pink-400 rounded-lg flex items-center justify-center text-white text-2xl font-bold shadow-md">
+                        {employee.name.split(' ').map(n => n[0]).join('')}
+                      </div>
+                    )}
+                    <div className="flex items-center justify-center w-8 h-8 bg-gray-50 rounded-full">
+                      {getStatusIcon(employee.status)}
+                    </div>
                   </div>
-                  <div className="flex items-center justify-center w-8 h-8 bg-gray-50 rounded-full">
-                    {getStatusIcon(employee.status)}
+                  <h3 className="text-lg font-semibold text-gray-900 mb-1">{employee.name}</h3>
+                  <p className="text-sm text-gray-600 mb-3">{employee.role}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-500">{employee.department}</span>
+                    {getStatusBadge(employee.status)}
                   </div>
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">{employee.name}</h3>
-                <p className="text-sm text-gray-600 mb-3">{employee.role}</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-500">{employee.department}</span>
-                  {getStatusBadge(employee.status)}
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
-        {filteredEmployees.length === 0 && (
+        {filteredEmployees.length === 0 && !loading && (
           <div className="text-center py-12 bg-white rounded-xl shadow-sm">
             <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500 text-lg">No employees found matching your search.</p>
-            <button 
-              onClick={() => setSearchQuery('')}
-              className="mt-4 text-purple-600 hover:text-purple-700 font-medium"
-            >
-              Clear search
-            </button>
+            <p className="text-gray-500 text-lg">
+              {employees.length === 0 ? 'No employees found.' : 'No employees found matching your search.'}
+            </p>
+            {searchQuery && (
+              <button 
+                onClick={() => setSearchQuery('')}
+                className="mt-4 text-purple-600 hover:text-purple-700 font-medium"
+              >
+                Clear search
+              </button>
+            )}
           </div>
         )}
       </main>
@@ -235,16 +331,30 @@ export default function Dashboard() {
                       <span className="text-gray-600">Position:</span>
                       <span className="font-medium text-gray-900">{selectedEmployee.role}</span>
                     </div>
+                    {selectedEmployee.manager && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Manager:</span>
+                        <span className="font-medium text-gray-900">{selectedEmployee.manager}</span>
+                      </div>
+                    )}
+                    {selectedEmployee.location && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Location:</span>
+                        <span className="font-medium text-gray-900">{selectedEmployee.location}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 <div className="pb-4">
                   <h4 className="text-sm font-semibold text-gray-500 uppercase mb-2">Employment Details</h4>
                   <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Join Date:</span>
-                      <span className="font-medium text-gray-900">{selectedEmployee.joinDate}</span>
-                    </div>
+                    {selectedEmployee.joinDate && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Join Date:</span>
+                        <span className="font-medium text-gray-900">{selectedEmployee.joinDate}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between">
                       <span className="text-gray-600">Status:</span>
                       <span className="font-medium text-gray-900 capitalize">{selectedEmployee.status}</span>

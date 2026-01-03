@@ -61,8 +61,14 @@ export default function Login() {
         setIsLoading(true);
         
         try {
+            // Determine if identifier is email or ID
+            const isEmail = identifier.includes('@');
+            const loginData = isEmail 
+                ? { email: identifier, password, role }
+                : { id: identifier, password, role };
+            
             // Call the login function from context
-            await login({ email: identifier, password, role });
+            await login(loginData);
             
             // Show success message
             setToast({

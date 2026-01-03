@@ -165,10 +165,69 @@ Only visible when admin is editing employee profile:
 
 The following API endpoints should be implemented:
 
-### Fetch Employee Data
+### Fetch Employee Data(for admin)
 ```javascript
-// GET /api/admin/employee/:employeeId
-// Returns full employee profile data
+// GET /employees/:emp_id
+// Returns full employee profile data```
+```json
+{
+  "employee": {
+    "id": "string",
+    "company_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "name": "string",
+    "phone": "string",
+    "department": "string",
+    "email": "user@example.com",
+    "manager": "string",
+    "location": "string",
+    "job_position": "string",
+    "prof_pic": "string",
+    "current_status": 0
+  },
+  "private_info": {
+    "emp_id": "string",
+    "dob": "2026-01-03",
+    "address": "string",
+    "nationality": "string",
+    "gender": "string",
+    "martial_status": true,
+    "doj": "2026-01-03",
+    "bank_acc_no": "string",
+    "bank_name": "string",
+    "ifsc_code": "string",
+    "pan_no": "string",
+    "uan_no": "string"
+  },
+  "salary": {
+    "emp_id": "string",
+    "monthly_wage": 0,
+    "yearly_wage": 0,
+    "basic_sal": 0,
+    "hra": 0,
+    "sa": 0,
+    "perf_bonus": 0,
+    "ita": 0,
+    "fa": 0,
+    "pf1": 0,
+    "pf2": 0,
+    "prof_tax": 0
+  },
+  "resume": {
+    "emp_id": "string",
+    "about": 0,
+    "skills": "string",
+    "certification": "string"
+  },
+  "attendance_records": [],
+  "leave_records": [],
+  "summary": {
+    "emp_id": "string",
+    "present_days": 0,
+    "leave_count": 0,
+    "leave_left": 0,
+    "tot_work_days": 0
+  }
+}
 ```
 
 ### Update Employee Data
@@ -176,40 +235,75 @@ The following API endpoints should be implemented:
 // PUT /api/admin/employee/:employeeId
 // Body: { ...editableData }
 // Updates employee profile
+    ```json
+    {
+  "name": "string",
+  "phone": "string",
+  "department": "string",
+  "email": "user@example.com",
+  "manager": "string",
+  "location": "string",
+  "job_position": "string",
+  "prof_pic": "string",
+  "current_status": 0
+}```
 ```
 
 ### Fetch Own Profile
 ```javascript
-// GET /api/employee/profile
+// GET /employees/emp_id
 // Returns current user's profile
+```json
+{
+  "id": "string",
+  "company_id": "string",
+  "name": "string",
+  "phone": "string",
+  "department": "string",
+  "email": "string",
+  "manager": "string",
+  "location": "string",
+  "job_position": "string",
+  "resume": "string",
+  "prof_pic": "string",
+  "current_status": 0,
+  "role": "employee",
+  "private_info": {
+    "emp_id": "string",
+    "dob": "2026-01-03",
+    "address": "string",
+    "nationality": "string",
+    "gender": "string",
+    "martial_status": true,
+    "doj": "2026-01-03",
+    "bank_acc_no": "string",
+    "bank_name": "string",
+    "ifsc_code": "string",
+    "pan_no": "string",
+    "uan_no": "string"
+  },
+  "resume_data": {
+    "emp_id": "string",
+    "about": 0,
+    "skills": "string",
+    "certification": "string",
+    "column_0": 0
+  },
+  "salary": {
+    "emp_id": "string",
+    "monthly_wage": 0,
+    "yearly_wage": 0,
+    "basic_sal": 0,
+    "hra": 0,
+    "sa": 0,
+    "perf_bonus": 0,
+    "ita": 0,
+    "fa": 0,
+    "pf1": 0,
+    "pf2": 0,
+    "prof_tax": 0
+  }
+}
+
 ```
 
-## Security Considerations
-
-1. **Route Protection**: Ensure only admins can access profiles with `?id=` parameter
-2. **API Authorization**: Verify admin role on backend before allowing profile edits
-3. **Data Validation**: Validate all input fields before saving
-4. **Audit Logging**: Log all profile changes made by admins
-
-## Future Enhancements
-
-- [ ] Add profile picture upload for employees
-- [ ] Implement history/audit trail of changes
-- [ ] Add bulk edit capabilities for multiple employees
-- [ ] Implement role-based field permissions
-- [ ] Add export profile to PDF functionality
-- [ ] Implement real-time validation for PAN, UAN, IFSC codes
-- [ ] Add confirmation dialog before saving major changes
-
-## Testing Checklist
-
-- [ ] Employee can view own profile
-- [ ] Employee cannot access other profiles
-- [ ] Admin can click "Edit Full Profile" from dashboard
-- [ ] Admin can edit all fields in employee profile
-- [ ] Admin can view salary info for employees
-- [ ] Save button appears only for admin editing employees
-- [ ] Banner shows correct employee name and ID
-- [ ] All edit icons appear for admin
-- [ ] Fields are properly readonly for employees
-- [ ] Navigation between dashboard and profile works seamlessly

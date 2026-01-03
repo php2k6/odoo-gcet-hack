@@ -39,4 +39,46 @@ api.interceptors.response.use(
   }
 );
 
+// Admin API functions for employee management
+
+// Update basic employee details (admin only)
+export const updateEmployeeDetails = async (empId, data) => {
+  try {
+    const response = await api.put(`/employees/${empId}`, data);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Delete employee (admin only)
+export const deleteEmployee = async (empId) => {
+  try {
+    const response = await api.delete(`/employees/${empId}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Update employee resume (admin only)
+export const updateEmployeeResume = async (empId, data) => {
+  try {
+    const response = await api.put(`/employees/${empId}/resume`, data);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Update employee salary (admin only)
+export const updateEmployeeSalary = async (empId, data) => {
+  try {
+    const response = await api.put(`/employees/${empId}/salary`, data);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export default api;

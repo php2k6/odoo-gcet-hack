@@ -1,7 +1,17 @@
 import React from 'react';
-import { User, Calendar, FileText, LogOut, Edit, Plus, Bell, TrendingUp, DollarSign, Percent } from 'lucide-react';
+import { Calendar, FileText, TrendingUp, DollarSign, Percent, Edit, Save, X } from 'lucide-react';
 
-export default function SalaryInfo() {
+export default function SalaryInfo({ 
+    isAdmin, 
+    salaryData, 
+    isEditing, 
+    onEdit, 
+    onSave, 
+    onCancel, 
+    editableData, 
+    onFieldChange,
+    isLoading 
+}) {
     const salaryData = {
         monthWage: 50000,
         yearlyWage: 600000,
