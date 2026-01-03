@@ -40,7 +40,7 @@ export default function EmployeeLeave() {
                 startDate: leave.start_date,
                 endDate: leave.end_date,
                 days: calculateDays(leave.start_date, leave.end_date),
-                status: leave.is_approved === true ? 'Approved' : (leave.is_approved === null || leave.is_approved === undefined) ? 'Pending' : 'Rejected',
+                status: 'Pending',
                 appliedDate: leave.start_date, // Using start_date as applied date for now
                 remarks: '',
                 adminComment: ''

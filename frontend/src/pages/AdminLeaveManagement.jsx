@@ -49,7 +49,7 @@ export default function AdminLeaveManagement() {
           startDate: leave.start_date,
           endDate: leave.end_date,
           days: calculateDays(leave.start_date, leave.end_date),
-          status: leave.is_approved === true ? 'Approved' : (leave.is_approved === null || leave.is_approved === undefined) ? 'Pending' : 'Rejected',
+          status: 'Pending',
           appliedDate: leave.start_date,
           remarks: '',
           adminComment: ''
@@ -86,7 +86,7 @@ export default function AdminLeaveManagement() {
         });
       } else if (action === 'Rejected') {
         // Call reject endpoint (deletes the record)
-        await api.put(`/leaves/${leaveId}/reject`);
+        await api.delete(`/leaves/${leaveId}/reject`);
         
         setToast({
           show: true,

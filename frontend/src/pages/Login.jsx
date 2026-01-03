@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Mail, Eye, EyeOff } from 'lucide-react';
 import MyToast from "../components/MyToast";
 import { useNavigate, Link } from "react-router-dom";
@@ -13,7 +13,14 @@ export default function Login() {
     const [isLoading, setIsLoading] = useState(false);
     const [emailError, setEmailError] = useState('');
     const navigate = useNavigate();
-    const { login } = useAuth();
+    const { login, isAuthenticated, isAdmin } = useAuth();
+
+    // Redirect authenticated users away from login page
+    useEffect(() => {
+        if (isAuthenticated) {
+            navigate(isAdmin ? '/dashboard' : '/attendance', { replace: true });
+        }
+    }, [isAuthenticated, isAdmin, navigate]);
 
     // Email validation function
     const validateEmail = (email) => {

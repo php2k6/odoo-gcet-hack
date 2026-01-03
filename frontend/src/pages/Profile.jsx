@@ -17,6 +17,25 @@ export default function Profile() {
     const employeeId = searchParams.get('id');
     const navigate = useNavigate();
     
+    // Get employee details passed from attendance page
+    const navigationState = window.history.state?.usr || {};
+    const passedEmployeeName = navigationState.employeeName;
+    const passedEmployeeDepartment = navigationState.employeeDepartment;
+    
+    // Prevent logout on browser back button
+    useEffect(() => {
+        const handlePopState = (e) => {
+            // Prevent default back behavior that might trigger logout
+            e.preventDefault();
+        };
+        
+        window.addEventListener('popstate', handlePopState);
+        
+        return () => {
+            window.removeEventListener('popstate', handlePopState);
+        };
+    }, []);
+    
     // Get user role and data from authentication context
     const { user, userRole, isAdmin, isLoading } = useAuth();
     const [profileData, setProfileData] = useState(null);
@@ -175,77 +194,140 @@ export default function Profile() {
                     
                 } else if (isAdmin && !viewingEmployee) {
                     // Admin viewing own profile - use demo data for now
-                    setDemoData();
+                    setDemoData(viewingEmployee);
                 }
                 
             } catch (error) {
                 console.error('Error fetching profile data:', error);
                 setApiError(error.response?.data?.message || 'Failed to load profile data');
-                // Fall back to demo data on error
-                setDemoData();
+                // Fall back to demo data on error - pass viewingEmployee context
+                setDemoData(viewingEmployee);
             } finally {
                 setApiLoading(false);
             }
         };
 
-        const setDemoData = () => {
+        const setDemoData = (isViewingEmp) => {
+            // Mock resume data - generic templates
+            const mockResumes = {
+                'Engineering': {
+                    about: 'Experienced software engineer with expertise in building scalable web applications. Passionate about clean code, system architecture, and mentoring junior developers.',
+                    skills: ['JavaScript', 'React', 'Node.js', 'TypeScript', 'Python', 'AWS', 'Docker', 'PostgreSQL', 'MongoDB', 'Git'],
+                    certification: ['AWS Certified Solutions Architect', 'React Advanced Certification', 'Google Cloud Professional', 'Scrum Master Certified']
+                },
+                'Product': {
+                    about: 'Results-driven product manager with a track record of launching successful products. Expert in agile methodologies, user research, and data-driven decision making.',
+                    skills: ['Product Strategy', 'Agile/Scrum', 'User Research', 'Data Analysis', 'Roadmap Planning', 'Stakeholder Management', 'JIRA', 'Figma', 'SQL'],
+                    certification: ['Product Management Certification', 'Certified Scrum Product Owner', 'Google Analytics Certified', 'Pragmatic Marketing Certified']
+                },
+                'Design': {
+                    about: 'Creative UX designer with a passion for crafting intuitive and beautiful user interfaces. Expert in user-centered design, prototyping, and design systems.',
+                    skills: ['UI/UX Design', 'Figma', 'Adobe XD', 'Sketch', 'Prototyping', 'User Research', 'Design Systems', 'HTML/CSS', 'Accessibility'],
+                    certification: ['Nielsen Norman Group UX Certification', 'Google UX Design Professional', 'Interaction Design Foundation', 'Accessibility Specialist']
+                },
+                'Default': {
+                    about: 'Professional with experience in the industry. Committed to excellence and continuous learning.',
+                    skills: ['Communication', 'Teamwork', 'Problem Solving', 'Time Management', 'Leadership'],
+                    certification: ['Professional Certification', 'Industry Training']
+                }
+            };
+
+            // Mock salary data - generic based on role level
+            const mockSalaryBase = {
+                monthly_wage: 6000,
+                yearly_wage: 72000,
+                hra: 1800,
+                da: 1200,
+                ma: 600,
+                pf: 720,
+                pt: 200,
+                esi: 216,
+                tds: 1080
+            };
+
             let demoData;
-            if (viewingEmployee) {
-                // Admin viewing employee profile - fetch employee data
+            if (isViewingEmp && employeeId) {
+                // Use data passed from attendance card
                 demoData = {
                     id: employeeId,
-                    name: 'Sarah Johnson',
+                    name: passedEmployeeName || 'Employee ' + employeeId.slice(-4),
                     loginId: employeeId,
-                    company: 'Tech Corp',
-                    email: 'sarah.j@company.com',
-                    department: 'Engineering',
-                    mobile: '+1 234-567-8901',
-                    manager: 'John Doe',
-                    location: 'New York, USA',
-                    role: 'Senior Developer',
-                    dob: '1990-05-15',
-                    gender: 'Female',
+                    company: 'TechCorp Solutions',
+                    email: passedEmployeeName ? `${passedEmployeeName.toLowerCase().replace(/\s+/g, '.')}@techcorp.com` : `employee${employeeId.slice(-4)}@techcorp.com`,
+                    department: passedEmployeeDepartment || 'General',
+                    mobile: '+1 (555) 000-0000',
+                    manager: 'Department Manager',
+                    location: 'Remote',
+                    role: 'Team Member',
+                    dob: '1990-01-01',
+                    gender: 'Other',
                     nationality: 'American',
                     maritalStatus: 'Single',
-                    personalEmail: 'sarah.personal@email.com',
-                    dateOfJoining: '2022-01-15',
-                    residingAddress: '123 Main Street, Apartment 4B, New York, NY 10001',
+                    personalEmail: `personal${employeeId.slice(-4)}@email.com`,
+                    dateOfJoining: '2023-01-01',
+                    residingAddress: '123 Main Street, City, State 00000',
                     empCode: employeeId,
-                    panNo: 'ABCDE1234F',
-                    uanNo: '123456789012',
-                    accountNumber: '1234567890',
-                    bankName: 'ABC Bank',
-                    ifscCode: 'ABCD0123456',
-                    emergencyContactName: 'Mike Johnson',
-                    emergencyPhone: '+1 234-567-8999',
+                    panNo: 'XXXXX0000X',
+                    uanNo: '000000000000',
+                    accountNumber: '0000000000',
+                    bankName: 'Bank Name',
+                    ifscCode: 'XXXX0000000',
+                    emergencyContactName: 'Emergency Contact',
+                    emergencyPhone: '+1 (555) 000-0000',
+                    profPic: null,
+                    currentStatus: 'Active'
                 };
+
+                // Set resume data based on department
+                const department = passedEmployeeDepartment || 'Default';
+                const resumeInfo = mockResumes[department] || mockResumes['Default'];
+                setResumeData(resumeInfo);
+                setEditableResumeData(resumeInfo);
+
+                // Set salary data
+                setSalaryData(mockSalaryBase);
+                setEditableSalaryData(mockSalaryBase);
             } else {
                 // Admin viewing own profile
                 demoData = {
                     name: user?.name || (userRole === 'employee' ? 'My Name' : 'Admin User'),
-                    loginId: user?.loginId || user?.employeeId || 'EMP001',
-                    company: user?.company || 'Tech Corp',
-                    email: user?.email || (userRole === 'employee' ? 'employee@company.com' : 'admin@company.com'),
-                    department: user?.department || 'Engineering',
-                    mobile: user?.mobile || user?.phone || '+1 234 567 8900',
-                    manager: user?.manager || 'John Doe',
-                    location: user?.location || 'New York, USA',
-                    dob: '1990-05-15',
+                    loginId: user?.loginId || user?.employeeId || 'ADMIN001',
+                    company: user?.company || 'TechCorp Solutions',
+                    email: user?.email || (userRole === 'employee' ? 'employee@company.com' : 'admin@techcorp.com'),
+                    department: user?.department || 'Management',
+                    mobile: user?.mobile || user?.phone || '+1 (555) 999-9999',
+                    manager: user?.manager || 'CEO',
+                    location: user?.location || 'San Francisco, CA',
+                    dob: '1985-05-15',
                     gender: 'Male',
-                    nationality: 'Indian',
-                    maritalStatus: 'Single',
-                    personalEmail: 'personal@email.com',
-                    dateOfJoining: '2020-01-15',
-                    residingAddress: '456 Park Avenue, New York, NY',
-                    empCode: 'EMP001',
-                    panNo: 'ABCDE1234F',
-                    uanNo: '123456789012',
-                    accountNumber: '',
-                    bankName: '',
-                    ifscCode: '',
-                    emergencyContactName: '',
-                    emergencyPhone: '',
+                    nationality: 'American',
+                    maritalStatus: 'Married',
+                    personalEmail: 'admin.personal@email.com',
+                    dateOfJoining: '2018-01-15',
+                    residingAddress: '999 Executive Plaza, San Francisco, CA 94105',
+                    empCode: 'ADMIN001',
+                    panNo: 'ADMIN1234A',
+                    uanNo: '999999999999',
+                    accountNumber: '9999999999',
+                    bankName: 'Executive Bank',
+                    ifscCode: 'EXEC0009999',
+                    emergencyContactName: 'Emergency Admin',
+                    emergencyPhone: '+1 (555) 888-8888',
+                    profPic: null,
+                    currentStatus: 'Active'
                 };
+
+                // Set admin's own resume data
+                setResumeData({
+                    about: 'Experienced administrator with expertise in managing teams and operations.',
+                    skills: ['Leadership', 'Management', 'Strategy', 'Operations'],
+                    certification: ['Management Certification', 'Leadership Training']
+                });
+                setEditableResumeData({
+                    about: 'Experienced administrator with expertise in managing teams and operations.',
+                    skills: ['Leadership', 'Management', 'Strategy', 'Operations'],
+                    certification: ['Management Certification', 'Leadership Training']
+                });
             }
             
             setProfileData(demoData);
