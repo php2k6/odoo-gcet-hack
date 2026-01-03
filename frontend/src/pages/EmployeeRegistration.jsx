@@ -4,26 +4,41 @@ import { User, Briefcase, CreditCard, FileText, Upload, ChevronRight } from 'luc
 export default function EmployeeOnboardingForm() {
   const [currentSection, setCurrentSection] = useState(1);
   const [profilePreview, setProfilePreview] = useState(null);
+  const [profileImage, setProfileImage] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    password: '',
     phone: '',
     department: '',
     job_position: '',
     manager: '',
     location: '',
+    current_status: 1,
     dob: '',
+    doj: '',
     address: '',
     nationality: '',
     gender: '',
-    marital_status: '',
+    marital_status: 'single',
     bank_acc_no: '',
     bank_name: '',
     ifsc_code: '',
     pan_no: '',
     uan_no: '',
+    monthly_wage: '',
+    yearly_wage: '',
+    basic_sal: '',
+    hra: '',
+    sa: '',
+    perf_bonus: '',
+    ita: '',
+    fa: '',
+    pf1: '',
+    pf2: '',
+    prof_tax: '',
     about: '',
     skills: '',
     certification: ''
@@ -36,6 +51,7 @@ export default function EmployeeOnboardingForm() {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setProfileImage(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setProfilePreview(reader.result);
@@ -44,14 +60,100 @@ export default function EmployeeOnboardingForm() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    alert('Employee onboarding form submitted successfully!');
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Prepare the request body according to API structure
+      const requestBody = {
+        name: formData.name,
+        phone: formData.phone,
+        department: formData.department,
+        email: formData.email,
+        manager: formData.manager,
+        location: formData.location,
+        job_position: formData.job_position,
+        prof_pic: profilePreview || '',
+        current_status: formData.current_status,
+        private_info: {
+          dob: formData.dob,
+          address: formData.address,
+          nationality: formData.nationality,
+          gender: formData.gender,
+          martial_status: formData.marital_status === 'married',
+          doj: formData.doj,
+          bank_acc_no: formData.bank_acc_no,
+          bank_name: formData.bank_name,
+          ifsc_code: formData.ifsc_code,
+          pan_no: formData.pan_no,
+          uan_no: formData.uan_no
+        },
+        salary: {
+          monthly_wage: parseFloat(formData.monthly_wage) || 0,
+          yearly_wage: parseFloat(formData.yearly_wage) || 0,
+          basic_sal: parseFloat(formData.basic_sal) || 0,
+          hra: parseFloat(formData.hra) || 0,
+          sa: parseFloat(formData.sa) || 0,
+          perf_bonus: parseFloat(formData.perf_bonus) || 0,
+          ita: parseFloat(formData.ita) || 0,
+          fa: parseFloat(formData.fa) || 0,
+          pf1: parseFloat(formData.pf1) || 0,
+          pf2: parseFloat(formData.pf2) || 0,
+          prof_tax: parseFloat(formData.prof_tax) || 0
+        },
+        resume: {
+          about: formData.about,
+          skills: formData.skills,
+          certification: formData.certification
+        }
+      };
+
+      // Make API call
+      const baseURL = import.meta.env.VITE_BACKEND_API_URL || 'http://localhost:3000/api';
+      const response = await fetch(`${baseURL}/employees/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to create employee');
+      }
+
+      const data = await response.json();
+      console.log('Employee created successfully:', data);
+      alert('Employee onboarding form submitted successfully!');
+      
+      // Reset form
+      setFormData({
+        name: '', email: '', phone: '', department: '', job_position: '', manager: '',
+        location: '', current_status: 1, dob: '', doj: '', address: '', nationality: '',
+        gender: '', marital_status: 'single', bank_acc_no: '', bank_name: '', ifsc_code: '',
+        pan_no: '', uan_no: '', monthly_wage: '', yearly_wage: '', basic_sal: '', hra: '',
+        sa: '', perf_bonus: '', ita: '', fa: '', pf1: '', pf2: '', prof_tax: '',
+        about: '', skills: '', certification: ''
+      });
+      setProfilePreview(null);
+      setProfileImage(null);
+      setCurrentSection(1);
+      
+    } catch (err) {
+      console.error('Error submitting form:', err);
+      setError(err.message || 'Failed to submit form. Please try again.');
+      alert(`Error: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const nextSection = () => {
-    if (currentSection < 3) setCurrentSection(currentSection + 1);
+    if (currentSection < 4) setCurrentSection(currentSection + 1);
   };
 
   const prevSection = () => {
@@ -68,7 +170,7 @@ export default function EmployeeOnboardingForm() {
 
         <div className="flex justify-center mb-8">
           <div className="flex items-center space-x-4">
-            {[1, 2, 3].map((section) => (
+            {[1, 2, 3, 4].map((section) => (
               <React.Fragment key={section}>
                 <div className={`flex items-center justify-center w-10 h-10 rounded-full font-semibold transition-all ${
                   currentSection >= section 
@@ -77,7 +179,7 @@ export default function EmployeeOnboardingForm() {
                 }`}>
                   {section}
                 </div>
-                {section < 3 && (
+                {section < 4 && (
                   <div className={`w-16 h-1 rounded ${
                     currentSection > section ? 'bg-gradient-to-r from-blue-500 to-indigo-600' : 'bg-gray-200'
                   }`} />
@@ -120,19 +222,6 @@ export default function EmployeeOnboardingForm() {
                       required
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                       placeholder="john@company.com"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Password *</label>
-                    <input
-                      type="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
-                      placeholder="••••••••"
                     />
                   </div>
 
@@ -205,6 +294,20 @@ export default function EmployeeOnboardingForm() {
                       placeholder="Mumbai, India"
                     />
                   </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Current Status *</label>
+                    <select
+                      name="current_status"
+                      value={formData.current_status}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                    >
+                      <option value={1}>Active</option>
+                      <option value={0}>Inactive</option>
+                    </select>
+                  </div>
                 </div>
               </div>
             )}
@@ -223,6 +326,18 @@ export default function EmployeeOnboardingForm() {
                       type="date"
                       name="dob"
                       value={formData.dob}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Date of Joining *</label>
+                    <input
+                      type="date"
+                      name="doj"
+                      value={formData.doj}
                       onChange={handleChange}
                       required
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
@@ -359,6 +474,149 @@ export default function EmployeeOnboardingForm() {
             {currentSection === 3 && (
               <div className="space-y-6">
                 <div className="flex items-center space-x-3 mb-6">
+                  <Briefcase className="w-6 h-6 text-indigo-600" />
+                  <h2 className="text-2xl font-bold text-gray-900">Salary Information</h2>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Monthly Wage</label>
+                    <input
+                      type="number"
+                      name="monthly_wage"
+                      value={formData.monthly_wage}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                      placeholder="50000"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Yearly Wage</label>
+                    <input
+                      type="number"
+                      name="yearly_wage"
+                      value={formData.yearly_wage}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                      placeholder="600000"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Basic Salary</label>
+                    <input
+                      type="number"
+                      name="basic_sal"
+                      value={formData.basic_sal}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                      placeholder="30000"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">HRA (House Rent Allowance)</label>
+                    <input
+                      type="number"
+                      name="hra"
+                      value={formData.hra}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                      placeholder="15000"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">SA (Special Allowance)</label>
+                    <input
+                      type="number"
+                      name="sa"
+                      value={formData.sa}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                      placeholder="5000"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Performance Bonus</label>
+                    <input
+                      type="number"
+                      name="perf_bonus"
+                      value={formData.perf_bonus}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                      placeholder="10000"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">ITA (IT Allowance)</label>
+                    <input
+                      type="number"
+                      name="ita"
+                      value={formData.ita}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                      placeholder="2000"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">FA (Food Allowance)</label>
+                    <input
+                      type="number"
+                      name="fa"
+                      value={formData.fa}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                      placeholder="1000"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">PF1 (Employee PF)</label>
+                    <input
+                      type="number"
+                      name="pf1"
+                      value={formData.pf1}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                      placeholder="1800"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">PF2 (Employer PF)</label>
+                    <input
+                      type="number"
+                      name="pf2"
+                      value={formData.pf2}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                      placeholder="1800"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Professional Tax</label>
+                    <input
+                      type="number"
+                      name="prof_tax"
+                      value={formData.prof_tax}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                      placeholder="200"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {currentSection === 4 && (
+              <div className="space-y-6">
+                <div className="flex items-center space-x-3 mb-6">
                   <FileText className="w-6 h-6 text-indigo-600" />
                   <h2 className="text-2xl font-bold text-gray-900">Resume & Profile (Optional)</h2>
                 </div>
@@ -440,7 +698,7 @@ export default function EmployeeOnboardingForm() {
                 Previous
               </button>
 
-              {currentSection < 3 ? (
+              {currentSection < 4 ? (
                 <button
                   type="button"
                   onClick={nextSection}
@@ -452,9 +710,12 @@ export default function EmployeeOnboardingForm() {
               ) : (
                 <button
                   type="submit"
-                  className="inline-flex items-center px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 transition font-medium shadow-md"
+                  disabled={loading}
+                  className={`inline-flex items-center px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 transition font-medium shadow-md ${
+                    loading ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
                 >
-                  Submit Application
+                  {loading ? 'Submitting...' : 'Submit Application'}
                 </button>
               )}
             </div>

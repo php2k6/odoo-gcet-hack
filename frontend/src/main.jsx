@@ -14,6 +14,7 @@ import Profile from './pages/Profile.jsx'
 import EmployeeAttendance from './pages/EmployeeAttendance.jsx'
 import AdminLeaveManagement from './pages/AdminLeaveManagement.jsx'
 import AttendancePage from './pages/AttendancePage.jsx'
+import EmployeeRegistration from './pages/EmployeeRegistration.jsx'
 import NotFound from './pages/NotFound.jsx'
 
 const router = createBrowserRouter([
@@ -57,6 +58,10 @@ const router = createBrowserRouter([
       {
         path: 'attendance',
         element: <AttendancePage />,
+      },
+      {
+        path: 'employee-registration',
+        element: <EmployeeRegistration />,
       },
       {
         path: 'employee',
