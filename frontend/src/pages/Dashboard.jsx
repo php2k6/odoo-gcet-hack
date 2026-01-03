@@ -1,0 +1,251 @@
+import React, { useState } from 'react';
+import { Search, Plane, XCircle } from 'lucide-react';
+import AdminNav from '../components/AdminNav.jsx';
+
+// Main Dashboard Component
+export default function EmployeeDashboard() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [currentPage, setCurrentPage] = useState('employees');
+
+  // Sample employee data
+  const employees = [
+    { id: 1, name: 'Sarah Johnson', role: 'Senior Developer', department: 'Engineering', email: 'sarah.j@company.com', phone: '+1 234-567-8901', status: 'present', joinDate: '2022-01-15' },
+    { id: 2, name: 'Michael Chen', role: 'Product Manager', department: 'Product', email: 'michael.c@company.com', phone: '+1 234-567-8902', status: 'leave', joinDate: '2021-06-20' },
+    { id: 3, name: 'Emily Davis', role: 'UX Designer', department: 'Design', email: 'emily.d@company.com', phone: '+1 234-567-8903', status: 'absent', joinDate: '2023-03-10' },
+    { id: 4, name: 'James Wilson', role: 'Backend Developer', department: 'Engineering', email: 'james.w@company.com', phone: '+1 234-567-8904', status: 'present', joinDate: '2022-08-05' },
+    { id: 5, name: 'Lisa Anderson', role: 'Marketing Lead', department: 'Marketing', email: 'lisa.a@company.com', phone: '+1 234-567-8905', status: 'present', joinDate: '2021-11-30' },
+    { id: 6, name: 'David Brown', role: 'HR Manager', department: 'Human Resources', email: 'david.b@company.com', phone: '+1 234-567-8906', status: 'leave', joinDate: '2020-04-15' },
+    { id: 7, name: 'Jessica Martinez', role: 'Frontend Developer', department: 'Engineering', email: 'jessica.m@company.com', phone: '+1 234-567-8907', status: 'present', joinDate: '2023-01-20' },
+    { id: 8, name: 'Robert Taylor', role: 'Sales Director', department: 'Sales', email: 'robert.t@company.com', phone: '+1 234-567-8908', status: 'absent', joinDate: '2019-09-12' },
+    { id: 9, name: 'Amanda White', role: 'Data Analyst', department: 'Analytics', email: 'amanda.w@company.com', phone: '+1 234-567-8909', status: 'present', joinDate: '2022-05-18' },
+  ];
+
+  const getStatusIcon = (status) => {
+    switch(status) {
+      case 'present':
+        return <div className="w-3 h-3 bg-green-500 rounded-full" title="Present in office"></div>;
+      case 'leave':
+        return <Plane className="w-4 h-4 text-blue-500" title="On leave" />;
+      case 'absent':
+        return <div className="w-3 h-3 bg-yellow-500 rounded-full" title="Absent"></div>;
+      default:
+        return null;
+    }
+  };
+
+  const getStatusBadge = (status) => {
+    switch(status) {
+      case 'present':
+        return <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">Present</span>;
+      case 'leave':
+        return <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">On Leave</span>;
+      case 'absent':
+        return <span className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-full">Absent</span>;
+      default:
+        return null;
+    }
+  };
+
+  const filteredEmployees = employees.filter(emp => 
+    emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    emp.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    emp.department.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleCardClick = (employee) => {
+    setSelectedEmployee(employee);
+  };
+
+  const closeEmployeeView = () => {
+    setSelectedEmployee(null);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100" onClick={() => setShowProfileMenu(false)}>
+      {/* Navbar */}
+      <AdminNav 
+        showProfileMenu={showProfileMenu} 
+        setShowProfileMenu={setShowProfileMenu}
+        currentPage={currentPage}
+      />
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Page Title and Description */}
+        <div className="mb-6">
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">Employee Directory</h2>
+          <p className="text-gray-600">View and manage employee information, attendance, and status</p>
+        </div>
+
+        {/* Search and View Button */}
+        <div className="mb-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+          <button className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium hover:from-purple-600 hover:to-pink-600 transition duration-200 shadow-md hover:shadow-lg transform hover:scale-105">
+            VIEW ALL
+          </button>
+          <div className="relative flex-1">
+            <input
+              type="text"
+              placeholder="Search employees by name, role, or department..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200 shadow-sm"
+            />
+            <Search className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+          </div>
+        </div>
+
+        {/* Status Legend */}
+        <div className="mb-6 p-4 bg-white rounded-lg shadow-sm border border-gray-200">
+          <h3 className="text-sm font-semibold text-gray-700 mb-3">Status Legend:</h3>
+          <div className="flex flex-wrap gap-4">
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+              <span className="text-sm text-gray-600">Present in Office</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Plane className="w-4 h-4 text-blue-500" />
+              <span className="text-sm text-gray-600">On Leave</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+              <span className="text-sm text-gray-600">Absent (No Time-off Applied)</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Employee Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredEmployees.map((employee) => (
+            <div
+              key={employee.id}
+              onClick={() => handleCardClick(employee)}
+              className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1 border border-gray-200 overflow-hidden"
+            >
+              <div className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-20 h-20 bg-gradient-to-br from-purple-400 to-pink-400 rounded-lg flex items-center justify-center text-white text-2xl font-bold shadow-md">
+                    {employee.name.split(' ').map(n => n[0]).join('')}
+                  </div>
+                  <div className="flex items-center justify-center w-8 h-8 bg-gray-50 rounded-full">
+                    {getStatusIcon(employee.status)}
+                  </div>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">{employee.name}</h3>
+                <p className="text-sm text-gray-600 mb-3">{employee.role}</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-gray-500">{employee.department}</span>
+                  {getStatusBadge(employee.status)}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {filteredEmployees.length === 0 && (
+          <div className="text-center py-12 bg-white rounded-xl shadow-sm">
+            <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <p className="text-gray-500 text-lg">No employees found matching your search.</p>
+            <button 
+              onClick={() => setSearchQuery('')}
+              className="mt-4 text-purple-600 hover:text-purple-700 font-medium"
+            >
+              Clear search
+            </button>
+          </div>
+        )}
+      </main>
+
+      {/* Employee Detail Modal */}
+      {selectedEmployee && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={closeEmployeeView}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold">Employee Information</h2>
+                  <p className="text-purple-100 text-sm mt-1">View-only mode</p>
+                </div>
+                <button
+                  onClick={closeEmployeeView}
+                  className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition duration-200"
+                >
+                  <XCircle className="w-5 h-5 text-black" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-8">
+              <div className="flex items-start space-x-6 mb-8">
+                <div className="w-24 h-24 bg-gradient-to-br from-purple-400 to-pink-400 rounded-xl flex items-center justify-center text-white text-3xl font-bold shadow-lg">
+                  {selectedEmployee.name.split(' ').map(n => n[0]).join('')}
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-1">{selectedEmployee.name}</h3>
+                  <p className="text-gray-600 mb-2">{selectedEmployee.role}</p>
+                  {getStatusBadge(selectedEmployee.status)}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="border-b border-gray-200 pb-4">
+                  <h4 className="text-sm font-semibold text-gray-500 uppercase mb-2">Contact Information</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Email:</span>
+                      <span className="font-medium text-gray-900">{selectedEmployee.email}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Phone:</span>
+                      <span className="font-medium text-gray-900">{selectedEmployee.phone}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border-b border-gray-200 pb-4">
+                  <h4 className="text-sm font-semibold text-gray-500 uppercase mb-2">Department Information</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Department:</span>
+                      <span className="font-medium text-gray-900">{selectedEmployee.department}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Position:</span>
+                      <span className="font-medium text-gray-900">{selectedEmployee.role}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pb-4">
+                  <h4 className="text-sm font-semibold text-gray-500 uppercase mb-2">Employment Details</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Join Date:</span>
+                      <span className="font-medium text-gray-900">{selectedEmployee.joinDate}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Status:</span>
+                      <span className="font-medium text-gray-900 capitalize">{selectedEmployee.status}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8 flex justify-end">
+                <button
+                  onClick={closeEmployeeView}
+                  className="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium hover:from-purple-600 hover:to-pink-600 transition duration-200 shadow-md"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
